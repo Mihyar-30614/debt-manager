@@ -1,6 +1,3 @@
-// Package main: HTTP app — routes, middleware, auth helpers, and handlers.
-// Layout: App & env helpers → PWA (manifest/sw/icons) → main() → middleware →
-// render/flash/CSRF → auth handlers → debt → payment → plan → budget handlers.
 package main
 
 import (
@@ -28,11 +25,11 @@ import (
 )
 
 type App struct {
-	db           *sql.DB
-	tpl          *template.Template
-	sessionKey   string
-	csrfKey      string
-	rateLimiter  map[string][]time.Time
+	db            *sql.DB
+	tpl           *template.Template
+	sessionKey    string
+	csrfKey       string
+	rateLimiter   map[string][]time.Time
 	rateLimiterMu sync.RWMutex
 }
 
@@ -48,7 +45,7 @@ func loadEnvFile() map[string]string {
 	if err != nil {
 		return env // Return empty map if .env doesn't exist
 	}
-	
+
 	lines := strings.Split(string(data), "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -88,10 +85,10 @@ func loadOrCreateKey(keyName string, env map[string]string) string {
 		}
 		log.Printf("Warning: %s from .env is too short, generating new one", keyName)
 	}
-	
+
 	// Generate new key
 	key := generateSessionKey()
-	
+
 	// Try to save to .env file
 	envFile := ".env"
 	envContent, err := os.ReadFile(envFile)
@@ -102,7 +99,7 @@ func loadOrCreateKey(keyName string, env map[string]string) string {
 		// .env doesn't exist, start with empty file
 		envLines = []string{}
 	}
-	
+
 	// Check if key already exists in .env
 	keyFound := false
 	for i, line := range envLines {
@@ -113,7 +110,7 @@ func loadOrCreateKey(keyName string, env map[string]string) string {
 			break
 		}
 	}
-	
+
 	if !keyFound {
 		// Add new key at the end
 		if len(envLines) > 0 && envLines[len(envLines)-1] != "" {
@@ -121,7 +118,7 @@ func loadOrCreateKey(keyName string, env map[string]string) string {
 		}
 		envLines = append(envLines, fmt.Sprintf("%s=%s", keyName, key))
 	}
-	
+
 	// Write back to .env
 	content := strings.Join(envLines, "\n")
 	if !strings.HasSuffix(content, "\n") && len(envLines) > 0 {
@@ -132,7 +129,7 @@ func loadOrCreateKey(keyName string, env map[string]string) string {
 	} else {
 		log.Printf("Generated and saved %s to .env", keyName)
 	}
-	
+
 	return key
 }
 
@@ -242,15 +239,15 @@ func main() {
 	var tpl *template.Template
 	tpl = template.New("")
 	funcs := template.FuncMap{
-		"money": money,
-		"apr":   bpsToAPR,
-		"mul":   func(a, b int64) int64 { return a * b },
-		"sub":   func(a, b int64) int64 { return a - b },
-		"div":   func(a, b float64) float64 { return a / b },
-		"float": func(i int64) float64 { return float64(i) },
+		"money":    money,
+		"apr":      bpsToAPR,
+		"mul":      func(a, b int64) int64 { return a * b },
+		"sub":      func(a, b int64) int64 { return a - b },
+		"div":      func(a, b float64) float64 { return a / b },
+		"float":    func(i int64) float64 { return float64(i) },
 		"debtKind": formatDebtKind,
-		"now": func() time.Time { return time.Now() },
-		"date": func(format string, t time.Time) string { return t.Format(format) },
+		"now":      func() time.Time { return time.Now() },
+		"date":     func(format string, t time.Time) string { return t.Format(format) },
 		"getDebt": func(debtMap map[int64]Debt, id int64) Debt {
 			return debtMap[id]
 		},
@@ -318,10 +315,10 @@ func main() {
 	env := loadEnvFile()
 
 	app := &App{
-		db:         db,
-		tpl:        tpl,
-		sessionKey: loadOrCreateKey("SESSION_KEY", env),
-		csrfKey:    loadOrCreateKey("CSRF_KEY", env),
+		db:          db,
+		tpl:         tpl,
+		sessionKey:  loadOrCreateKey("SESSION_KEY", env),
+		csrfKey:     loadOrCreateKey("CSRF_KEY", env),
 		rateLimiter: make(map[string][]time.Time),
 	}
 
@@ -375,13 +372,20 @@ func main() {
 	if port == "" {
 		port = "8100"
 	}
-	
+
+	bind := getEnv("BIND", env)
+	if bind == "" {
+		bind = "127.0.0.1"
+	}
+
+	addr := bind + ":" + port
+
 	if certFile != "" && keyFile != "" {
-		log.Printf("Starting HTTPS server on :%s", port)
-		log.Fatal(http.ListenAndServeTLS(":"+port, certFile, keyFile, mux))
+		log.Printf("Starting HTTPS server on :%s", addr)
+		log.Fatal(http.ListenAndServeTLS(addr, certFile, keyFile, mux))
 	} else {
 		log.Printf("Starting HTTP server on :%s (set TLS_CERT_FILE and TLS_KEY_FILE for HTTPS)", port)
-		log.Fatal(http.ListenAndServe(":"+port, mux))
+		log.Fatal(http.ListenAndServe(addr, mux))
 	}
 }
 
@@ -468,24 +472,24 @@ func (a *App) requireCSRF(next http.HandlerFunc) http.HandlerFunc {
 			next(w, r)
 			return
 		}
-		
+
 		userID := getUserID(r)
 		if userID == 0 {
 			http.Error(w, "Unauthorized", 401)
 			return
 		}
-		
+
 		token := r.FormValue("csrf_token")
 		if token == "" {
 			token = r.Header.Get("X-CSRF-Token")
 		}
-		
+
 		if !validateCSRFToken(token, userID, a.csrfKey) {
 			log.Printf("CSRF validation failed for user %d", userID)
 			http.Error(w, "Invalid security token", 403)
 			return
 		}
-		
+
 		next(w, r)
 	}
 }
@@ -499,10 +503,10 @@ func (a *App) rateLimit(maxAttempts int, window time.Duration) func(http.Handler
 				next(w, r)
 				return
 			}
-			
+
 			key := host
 			now := time.Now()
-			
+
 			a.rateLimiterMu.Lock()
 			// Clean old entries
 			if attempts, exists := a.rateLimiter[key]; exists {
@@ -513,7 +517,7 @@ func (a *App) rateLimit(maxAttempts int, window time.Duration) func(http.Handler
 					}
 				}
 				a.rateLimiter[key] = valid
-				
+
 				if len(valid) >= maxAttempts {
 					a.rateLimiterMu.Unlock()
 					log.Printf("Rate limit exceeded for %s", key)
@@ -521,14 +525,14 @@ func (a *App) rateLimit(maxAttempts int, window time.Duration) func(http.Handler
 					return
 				}
 			}
-			
+
 			// Add current attempt
 			if a.rateLimiter[key] == nil {
 				a.rateLimiter[key] = make([]time.Time, 0)
 			}
 			a.rateLimiter[key] = append(a.rateLimiter[key], now)
 			a.rateLimiterMu.Unlock()
-			
+
 			next(w, r)
 		}
 	}
@@ -561,9 +565,12 @@ func (a *App) getCSRFToken(r *http.Request) string {
 }
 
 func getBaseURL(r *http.Request) string {
-	scheme := "http"
-	if r.TLS != nil {
-		scheme = "https"
+	scheme := r.Header.Get("X-Forwarded-Proto")
+	if scheme == "" {
+		scheme = "http"
+		if r.TLS != nil {
+			scheme = "https"
+		}
 	}
 	host := r.Host
 	if host == "" {
@@ -579,20 +586,20 @@ func (a *App) sendPasswordResetEmail(to, resetURL string) error {
 	smtpUser := getEnv("SMTP_USER", env)
 	smtpPass := getEnv("SMTP_PASSWORD", env)
 	smtpFrom := getEnv("SMTP_FROM", env)
-	
+
 	// If SMTP not configured, log the link instead
 	if smtpHost == "" || smtpUser == "" || smtpPass == "" {
 		log.Printf("SMTP not configured. Password reset link for %s: %s", to, resetURL)
 		return nil
 	}
-	
+
 	if smtpFrom == "" {
 		smtpFrom = smtpUser
 	}
 	if smtpPort == "" {
 		smtpPort = "587"
 	}
-	
+
 	subject := "Password Reset - Debt Manager"
 	body := fmt.Sprintf(`Hello,
 
@@ -607,17 +614,17 @@ If you didn't request this, please ignore this email.
 
 --
 Debt Manager`, resetURL)
-	
+
 	msg := []byte(fmt.Sprintf("To: %s\r\n", to) +
 		fmt.Sprintf("From: %s\r\n", smtpFrom) +
 		fmt.Sprintf("Subject: %s\r\n", subject) +
 		"Content-Type: text/plain; charset=UTF-8\r\n" +
 		"\r\n" +
 		body + "\r\n")
-	
+
 	addr := fmt.Sprintf("%s:%s", smtpHost, smtpPort)
 	auth := smtp.PlainAuth("", smtpUser, smtpPass, smtpHost)
-	
+
 	return smtp.SendMail(addr, auth, smtpFrom, []string{to}, msg)
 }
 
@@ -656,6 +663,3 @@ func (a *App) getFlash(r *http.Request) (string, string) {
 	}
 	return flashCookie.Value, flashType
 }
-
-
-
