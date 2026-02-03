@@ -1,0 +1,46 @@
+{{define "budget_expense_edit_content"}}
+<div class="row">
+  <div>
+    <h1>Edit expense</h1>
+    <p>Category: {{.Category.Name}} — {{monthName .Budget.Month}} {{.Budget.Year}}</p>
+  </div>
+  <a href="/budget/view?year={{.Budget.Year}}&month={{.Budget.Month}}" class="btn">← Back</a>
+</div>
+
+<div class="card">
+  <form method="POST" action="/budget/expense/update">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+    <input type="hidden" name="id" value="{{.Expense.ID}}" />
+
+    <div class="formgrid cols-2">
+      <div>
+        <label>Date</label>
+        <input name="spent_on" type="date" value="{{.Expense.SpentOn.Format "2006-01-02"}}" required />
+      </div>
+      <div>
+        <label>Amount ($)</label>
+        <input name="amount_dollars" type="number" step="0.01" min="0.01" value="{{dollars .Expense.AmountCents}}" required />
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div>
+      <label>Note (optional)</label>
+      <input name="note" type="text" value="{{.Expense.Note}}" />
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="row" style="gap: 8px;">
+      <button type="submit" class="btn primary">Save</button>
+      <form method="POST" action="/budget/expense/delete" style="margin:0;" onsubmit="return confirm('Delete this expense?');">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+        <input type="hidden" name="id" value="{{.Expense.ID}}" />
+        <button type="submit" class="btn danger">Delete</button>
+      </form>
+    </div>
+  </form>
+</div>
+{{end}}
+{{define "budget_expense_edit.html"}}{{template "layout" .}}{{end}}

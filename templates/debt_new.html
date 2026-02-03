@@ -1,0 +1,120 @@
+{{define "debt_new_content"}}
+<div class="row">
+  <div>
+    <h1>Add debt</h1>
+    <p>Create a debt entry. Values are local-only.</p>
+  </div>
+</div>
+
+<div class="card">
+  <form method="POST" action="/debts/create" id="debt-form">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+    <div class="formgrid cols-2">
+      <div>
+        <label>Name</label>
+        <input name="name" id="debt-name-input" placeholder="Visa, Student Loan..." required autofocus />
+        <div class="help">Example: "RBC Visa"</div>
+      </div>
+
+      <div>
+        <label>Type</label>
+        <select name="kind" required>
+          <option value="">Select type...</option>
+          <option value="card">💳 Credit Card</option>
+          <option value="line_of_credit">📊 Line of Credit</option>
+          <option value="personal_loan">👤 Personal Loan</option>
+          <option value="auto_loan">🚗 Auto Loan</option>
+          <option value="student_loan">🎓 Student Loan</option>
+          <option value="mortgage">🏠 Mortgage</option>
+          <option value="other_loan">📋 Other Loan</option>
+        </select>
+        <div class="help">Select the type of debt</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="formgrid cols-4">
+      <div>
+        <label>Balance ($)</label>
+        <input
+          name="balance_dollars"
+          type="number"
+          step="0.01"
+          min="0"
+          value="1000"
+          required
+        />
+      </div>
+      <div>
+        <label>APR (%)</label>
+        <input
+          name="apr_percent"
+          type="number"
+          step="0.01"
+          min="0"
+          value="19.99"
+          required
+        />
+      </div>
+      <div>
+        <label>Minimum payment ($)</label>
+        <input
+          name="min_payment_dollars"
+          type="number"
+          step="0.01"
+          min="0"
+          value="25"
+          required
+        />
+        <div class="help">Required minimum payment</div>
+      </div>
+      <div>
+        <label>Payment ($)</label>
+        <input
+          name="payment_dollars"
+          type="number"
+          step="0.01"
+          min="0"
+          value=""
+        />
+        <div class="help">Your typical payment amount (optional)</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="formgrid cols-4">
+      <div>
+        <label>Due day (1–28)</label>
+        <input
+          name="due_day"
+          type="number"
+          min="1"
+          max="28"
+          value="15"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div>
+      <label>Notes</label>
+      <textarea
+        name="notes"
+        rows="3"
+        placeholder="Account number, contact info, or any other notes..."
+      ></textarea>
+      <div class="help">Optional notes about this debt</div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <button class="btn primary" type="submit">Create debt</button>
+    <a class="btn ghost" href="/">Cancel</a>
+  </form>
+</div>
+{{end}}
+{{define "debt_new.html"}}{{template "layout" .}}{{end}}

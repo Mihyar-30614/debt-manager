@@ -1,0 +1,168 @@
+{{define "index_content"}}
+<div class="row">
+  <div>
+    <h1>Dashboard</h1>
+    <p>Balances, payments, and payoff planning in one place.</p>
+  </div>
+  <div style="display: flex; gap: 8px;">
+    {{if .ActiveDebts}}
+    <a href="/payments/new" class="btn primary">+ Record payment<span class="keyboard-hint">p</span></a>
+    {{end}}
+    <a href="/debts/new" class="btn primary">+ Add debt<span class="keyboard-hint">n</span></a>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<div class="card">
+  <form method="GET" action="/" class="search-form">
+    <div class="search-field">
+      <label>Search</label>
+      <input
+        id="search-input"
+        name="search"
+        type="text"
+        placeholder="Search by name..."
+        value="{{.SearchQuery}}"
+        autocomplete="off"
+      />
+      <div class="help">Press <kbd>/</kbd> to focus</div>
+    </div>
+    <div class="search-field">
+      <label>Type</label>
+      <select name="kind">
+        <option value="">All types</option>
+        <option value="card" {{if eq .KindFilter "card"}}selected{{end}}>Credit Card</option>
+        <option value="line_of_credit" {{if eq .KindFilter "line_of_credit"}}selected{{end}}>Line of Credit</option>
+        <option value="personal_loan" {{if eq .KindFilter "personal_loan"}}selected{{end}}>Personal Loan</option>
+        <option value="auto_loan" {{if eq .KindFilter "auto_loan"}}selected{{end}}>Auto Loan</option>
+        <option value="student_loan" {{if eq .KindFilter "student_loan"}}selected{{end}}>Student Loan</option>
+        <option value="mortgage" {{if eq .KindFilter "mortgage"}}selected{{end}}>Mortgage</option>
+        <option value="other_loan" {{if eq .KindFilter "other_loan"}}selected{{end}}>Other Loan</option>
+      </select>
+    </div>
+    <div class="search-field">
+      <label>Status</label>
+      <select name="status">
+        <option value="">All</option>
+        <option value="active" {{if eq .StatusFilter "active"}}selected{{end}}>Active</option>
+        <option value="closed" {{if eq .StatusFilter "closed"}}selected{{end}}>Closed</option>
+      </select>
+    </div>
+    <div class="search-actions">
+      <div style="display: flex; flex-direction: column;">
+        <label style="visibility: hidden; height: 0; margin: 0;">Actions</label>
+        <div style="display: flex; gap: 8px;">
+          <button type="submit" class="btn primary">Filter</button>
+          {{if or .SearchQuery .KindFilter .StatusFilter}}
+          <a href="/" class="btn ghost">Clear</a>
+          {{end}}
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="spacer"></div>
+
+<div class="grid cols-2">
+  <div class="card stat">
+    <div class="label">Total balance (all)</div>
+    <div class="value">{{money .Total}}</div>
+  </div>
+  <div class="card stat">
+    <div class="label">Active balance</div>
+    <div class="value">{{money .ActiveTotal}}</div>
+  </div>
+</div>
+
+
+<h2>Debts</h2>
+{{if .Debts}}
+{{$searchQuery := .SearchQuery}}
+{{$kindFilter := .KindFilter}}
+{{$statusFilter := .StatusFilter}}
+{{$sortBy := .SortBy}}
+<table>
+  <thead>
+    <tr>
+      <th class="sortable">
+        <a href="{{buildSortURL $searchQuery $kindFilter $statusFilter (cond (eq $sortBy "name_asc") "name_desc" "name_asc")}}" class="sort-link">
+          Name
+          {{if eq $sortBy "name_asc"}}<span class="sort-indicator">↑</span>{{end}}
+          {{if eq $sortBy "name_desc"}}<span class="sort-indicator">↓</span>{{end}}
+        </a>
+      </th>
+      <th class="sortable">
+        <a href="{{buildSortURL $searchQuery $kindFilter $statusFilter (cond (eq $sortBy "type_asc") "type_desc" "type_asc")}}" class="sort-link">
+          Type
+          {{if eq $sortBy "type_asc"}}<span class="sort-indicator">↑</span>{{end}}
+          {{if eq $sortBy "type_desc"}}<span class="sort-indicator">↓</span>{{end}}
+        </a>
+      </th>
+      <th class="sortable">
+        <a href="{{buildSortURL $searchQuery $kindFilter $statusFilter (cond (eq $sortBy "balance_desc") "balance_asc" "balance_desc")}}" class="sort-link">
+          Balance
+          {{if eq $sortBy "balance_asc"}}<span class="sort-indicator">↑</span>{{end}}
+          {{if eq $sortBy "balance_desc"}}<span class="sort-indicator">↓</span>{{end}}
+        </a>
+      </th>
+      <th class="sortable">
+        <a href="{{buildSortURL $searchQuery $kindFilter $statusFilter (cond (eq $sortBy "apr_desc") "apr_asc" "apr_desc")}}" class="sort-link">
+          APR
+          {{if eq $sortBy "apr_asc"}}<span class="sort-indicator">↑</span>{{end}}
+          {{if eq $sortBy "apr_desc"}}<span class="sort-indicator">↓</span>{{end}}
+        </a>
+      </th>
+      <th class="sortable">
+        <a href="{{buildSortURL $searchQuery $kindFilter $statusFilter (cond (eq $sortBy "min_desc") "min_asc" "min_desc")}}" class="sort-link">
+          Min
+          {{if eq $sortBy "min_asc"}}<span class="sort-indicator">↑</span>{{end}}
+          {{if eq $sortBy "min_desc"}}<span class="sort-indicator">↓</span>{{end}}
+        </a>
+      </th>
+      <th class="sortable">
+        <a href="{{buildSortURL $searchQuery $kindFilter $statusFilter (cond (eq $sortBy "due_desc") "due_asc" "due_desc")}}" class="sort-link">
+          Due
+          {{if eq $sortBy "due_asc"}}<span class="sort-indicator">↑</span>{{end}}
+          {{if eq $sortBy "due_desc"}}<span class="sort-indicator">↓</span>{{end}}
+        </a>
+      </th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Debts}}
+    <tr>
+      <td><a class="link" href="/debts/view?id={{.ID}}">{{.Name}}</a></td>
+      <td><span class="badge">{{debtKind .Kind}}</span></td>
+      <td>{{money .BalanceCents}}</td>
+      <td>{{apr .APRBps}}</td>
+      <td>{{money .MinPaymentCents}}</td>
+      <td><span class="badge">Day {{.DueDay}}</span></td>
+      <td>
+        {{if .Active}}
+        <span class="badge good">Active</span>
+        {{else}}
+        <span class="badge">Closed</span>
+        {{end}}
+      </td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+{{else}}
+<div class="card empty-state">
+  {{if or .SearchQuery .KindFilter .StatusFilter}}
+  <h3>No debts found</h3>
+  <p>No debts match your current filters.</p>
+  <a href="/" class="btn primary">Clear filters</a>
+  {{else}}
+  <h3>No debts yet</h3>
+  <p>Get started by adding your first debt to track.</p>
+  <a href="/debts/new" class="btn primary">+ Add your first debt</a>
+  {{end}}
+</div>
+{{end}}
+{{end}}
+{{define "index.html"}}{{template "layout" .}}{{end}}

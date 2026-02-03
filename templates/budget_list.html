@@ -1,0 +1,47 @@
+{{define "budget_list_content"}}
+<div class="row">
+  <div>
+    <h1>Personal budget</h1>
+    <p>Monthly income, categories, and spending. Link extra to your payoff plan.</p>
+  </div>
+  <div style="display: flex; gap: 8px;">
+    <a href="/budget/view?year={{.Year}}&month={{.Month}}" class="btn primary">This month ({{monthName .Month}} {{.Year}})</a>
+    <a href="/plan" class="btn">Payoff plan</a>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+{{if .Budgets}}
+<div class="card">
+  <h2 style="margin-top: 0">Recent budgets</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Month</th>
+        <th>Income</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Budgets}}
+      <tr>
+        <td><strong>{{monthName .Month}} {{.Year}}</strong></td>
+        <td>{{money .IncomeCents}}</td>
+        <td>
+          <a href="/budget/view?year={{.Year}}&month={{.Month}}" class="btn" style="padding: 6px 10px; font-size: 12px;">View</a>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{else}}
+<div class="card empty-state">
+  <h3>No budgets yet</h3>
+  <p>Open a month to set income and categories. Start with this month.</p>
+  <a href="/budget/view?year={{.Year}}&month={{.Month}}" class="btn primary">Open {{monthName .Month}} {{.Year}}</a>
+</div>
+{{end}}
+{{end}}
+{{define "budget_list.html"}}{{template "layout" .}}{{end}}

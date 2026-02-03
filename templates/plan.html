@@ -1,0 +1,129 @@
+{{define "plan_content"}}
+<div class="row">
+  <div>
+    <h1>Payoff plan</h1>
+    <p>Estimate payoff timeline with monthly interest compounding.</p>
+  </div>
+</div>
+
+<div class="grid cols-2">
+  <div class="card">
+    <form method="GET" action="/plan">
+      <div class="formgrid cols-2">
+        <div>
+          <label>Monthly budget ($)</label>
+          <input name="budget_dollars" type="number" step="0.01" min="0" value="{{dollars .MonthlyBudgetCents}}" />
+          <div class="help">Total monthly amount you'll put toward all debts.</div>
+          {{if gt .BudgetSuggestedCents 0}}
+          <div class="help" style="margin-top: 6px;">
+            <a href="/plan?budget_dollars={{dollars .BudgetSuggestedCents}}&strategy={{.Strategy}}" class="link">Use budget suggestion: {{money .BudgetSuggestedCents}}</a> (from this month's budget)
+          </div>
+          {{end}}
+        </div>
+        <div>
+          <label>Strategy</label>
+          <select name="strategy">
+            <option value="avalanche" {{if eq .Strategy "avalanche"}}selected{{end}}>avalanche (highest APR)</option>
+            <option value="snowball" {{if eq .Strategy "snowball"}}selected{{end}}>snowball (smallest balance)</option>
+          </select>
+          <div class="help">Avalanche saves more interest; snowball boosts momentum.</div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn primary" type="submit">Recalculate</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="stat">
+      <div class="label">Estimated payoff</div>
+      <div class="value">{{.Plan.PayoffMonths}} months</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="row">
+      <span class="badge warn">Estimated total interest</span>
+      <span style="font-weight:800; font-size:18px;">{{money .Plan.TotalInterestCents}}</span>
+    </div>
+    <div class="help">This is a simplified estimate (monthly compounding).</div>
+  </div>
+</div>
+
+<h2>First 12 months</h2>
+<div style="overflow-x: auto;">
+<table>
+  <thead>
+    <tr>
+      <th>Month</th>
+      <th>Interest</th>
+      <th>Total paid</th>
+      <th style="min-width: 200px;">Payments by debt</th>
+      <th style="min-width: 200px;">End balances</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range $i, $m := .Plan.Months}}
+      {{if le $m.MonthIndex 12}}
+      <tr>
+        <td><strong>{{$m.MonthIndex}}</strong></td>
+        <td>{{money $m.InterestCents}}</td>
+        <td><strong>{{money $m.TotalPaidCents}}</strong></td>
+        <td>
+          {{$hasPayments := false}}
+          {{range $.Debts}}
+            {{if index $.DebtsInPlan .ID}}
+              {{$amount := index $m.Payments .ID}}
+              {{if gt $amount 0}}
+                {{$hasPayments = true}}
+              {{end}}
+            {{end}}
+          {{end}}
+          {{if $hasPayments}}
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            {{range $.Debts}}
+              {{if index $.DebtsInPlan .ID}}
+                {{$amount := index $m.Payments .ID}}
+                {{if gt $amount 0}}
+                <div style="display: flex; justify-content: space-between; gap: 12px; font-size: 12px; align-items: center;">
+                  <span style="color: var(--muted); white-space: nowrap;">{{.Name}}:</span>
+                  <span style="font-weight: 600; white-space: nowrap;">{{money $amount}}</span>
+                </div>
+                {{end}}
+              {{end}}
+            {{end}}
+          </div>
+          {{else}}
+          <span style="color: var(--muted); font-size: 12px;">—</span>
+          {{end}}
+        </td>
+        <td>
+          {{$hasBalances := false}}
+          {{range $.Debts}}
+            {{if index $.DebtsInPlan .ID}}
+              {{$hasBalances = true}}
+            {{end}}
+          {{end}}
+          {{if $hasBalances}}
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            {{range $.Debts}}
+              {{if index $.DebtsInPlan .ID}}
+                {{$balance := index $m.Balances .ID}}
+                <div style="display: flex; justify-content: space-between; gap: 12px; font-size: 12px; align-items: center;">
+                  <span style="color: var(--muted); white-space: nowrap;">{{.Name}}:</span>
+                  <span style="white-space: nowrap;">{{money $balance}}</span>
+                </div>
+              {{end}}
+            {{end}}
+          </div>
+          {{else}}
+          <span style="color: var(--muted); font-size: 12px;">—</span>
+          {{end}}
+        </td>
+      </tr>
+      {{end}}
+    {{end}}
+  </tbody>
+</table>
+</div>
+{{end}}
+{{define "plan.html"}}{{template "layout" .}}{{end}}

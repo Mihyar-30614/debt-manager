@@ -1,0 +1,43 @@
+{{define "budget_category_edit_content"}}
+<div class="row">
+  <div>
+    <h1>Edit category</h1>
+    <p>Budget: {{monthName .Budget.Month}} {{.Budget.Year}}</p>
+  </div>
+  <a href="/budget/view?year={{.Budget.Year}}&month={{.Budget.Month}}" class="btn">← Back</a>
+</div>
+
+<div class="card">
+  <form method="POST" action="/budget/category/update">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+    <input type="hidden" name="id" value="{{.Category.ID}}" />
+    <input type="hidden" name="sort_order" value="{{.Category.SortOrder}}" />
+
+    <div class="formgrid cols-2">
+      <div>
+        <label>Category name</label>
+        <input name="name" type="text" value="{{.Category.Name}}" required />
+      </div>
+      <div>
+        <label>Monthly limit ($)</label>
+        <input name="limit_dollars" type="number" step="0.01" min="0" value="{{dollars .Category.LimitCents}}" />
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <label class="checkbox-option">
+      <input type="checkbox" name="is_debt_payoff" value="1" {{if .Category.IsDebtPayoff}}checked{{end}} />
+      <span class="checkbox-option-content">
+        <span class="checkbox-option-label">Extra for debt (link to payoff plan)</span>
+        <div class="help">Shows a suggested amount on the budget view and ties this category to your payoff plan.</div>
+      </span>
+    </label>
+
+    <div class="spacer"></div>
+
+    <button type="submit" class="btn primary">Save</button>
+  </form>
+</div>
+{{end}}
+{{define "budget_category_edit.html"}}{{template "layout" .}}{{end}}

@@ -1,0 +1,109 @@
+{{define "budget_view_content"}}
+<div class="row">
+  <div>
+    <h1>Budget — {{monthName .Budget.Month}} {{.Budget.Year}}</h1>
+    <p>Income, categories, and spending. Mark one category as &quot;Debt payoff (extra)&quot; to see plan suggestion.</p>
+  </div>
+  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    <a href="/budget" class="btn">← All budgets</a>
+    <a href="/plan" class="btn">Payoff plan</a>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<div class="card">
+  <h2 style="margin-top: 0">Income</h2>
+  <form method="POST" action="/budget/update">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+    <input type="hidden" name="year" value="{{.Budget.Year}}" />
+    <input type="hidden" name="month" value="{{.Budget.Month}}" />
+    <div class="formgrid cols-2" style="max-width: 320px;">
+      <div>
+        <label>Monthly income ($)</label>
+        <input name="income_dollars" type="number" step="0.01" min="0" value="{{dollars .Budget.IncomeCents}}" />
+      </div>
+      <div style="display: flex; align-items: flex-end;">
+        <button type="submit" class="btn primary">Save income</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="spacer"></div>
+
+<div class="row">
+  <h2 style="margin: 0;">Categories</h2>
+  <a href="/budget/category/add?budget_id={{.Budget.ID}}" class="btn primary">+ Add category</a>
+</div>
+
+{{if .Categories}}
+<div class="card" style="margin-top: 12px;">
+  <table>
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Limit</th>
+        <th>Spent</th>
+        <th>Remaining</th>
+        <th>Debt link</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Categories}}
+      <tr>
+        <td><strong>{{.Name}}</strong></td>
+        <td>{{money .LimitCents}}</td>
+        <td>{{money .SpentCents}}</td>
+        <td>
+          {{$rem := sub .LimitCents .SpentCents}}
+          {{if lt $rem 0}}<span class="badge bad">{{money $rem}}</span>{{else}}{{money $rem}}{{end}}
+        </td>
+        <td>
+          {{if .IsDebtPayoff}}
+          <span class="badge good">Extra for debt</span>
+          {{if gt .SuggestedPayoffCents 0}}
+          <div class="help" style="margin-top: 4px;">Suggested from plan: {{money .SuggestedPayoffCents}}</div>
+          {{end}}
+          {{else}}
+          —
+          {{end}}
+        </td>
+        <td>
+          <div class="row" style="gap: 8px; justify-content: flex-start;">
+            <a href="/budget/expense/add?category_id={{.ID}}" class="btn" style="padding: 6px 10px; font-size: 12px;">+ Expense</a>
+            <a href="/budget/category/expenses?category_id={{.ID}}" class="btn" style="padding: 6px 10px; font-size: 12px;">List</a>
+            <a href="/budget/category/edit?id={{.ID}}" class="btn" style="padding: 6px 10px; font-size: 12px;">Edit</a>
+            <form method="POST" action="/budget/category/delete" style="margin:0;" onsubmit="return confirm('Delete this category and all its expenses?');">
+              <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}" />
+              <input type="hidden" name="id" value="{{.ID}}" />
+              <button class="btn danger" type="submit" style="padding: 6px 10px; font-size: 12px;">Delete</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{else}}
+<div class="card empty-state" style="margin-top: 12px;">
+  <h3>No categories yet</h3>
+  <p>Add categories (e.g. Groceries, Rent, Debt payoff) and set limits. Mark one as &quot;Extra for debt&quot; to tie to your payoff plan.</p>
+  <a href="/budget/category/add?budget_id={{.Budget.ID}}" class="btn primary">+ Add first category</a>
+</div>
+{{end}}
+
+{{if and (gt .Budget.IncomeCents 0) (gt .MinPaymentsSum 0)}}
+<div class="spacer"></div>
+<div class="card">
+  <div class="stat">
+    <div class="label">Suggested extra for debt (income − category limits − minimums)</div>
+    <div class="value">{{money .SuggestedExtra}}</div>
+  </div>
+  <div class="help">Use this on the <a href="/plan" class="link">Payoff plan</a> as &quot;Monthly budget ($)&quot; (total toward debt) = minimums + this extra.</div>
+</div>
+{{end}}
+{{end}}
+{{define "budget_view.html"}}{{template "layout" .}}{{end}}

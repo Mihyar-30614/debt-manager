@@ -1,0 +1,44 @@
+{{define "budget_category_add_content"}}
+<div class="row">
+  <div>
+    <h1>Add category</h1>
+    <p>Budget: {{monthName .Budget.Month}} {{.Budget.Year}}</p>
+  </div>
+  <a href="/budget/view?year={{.Budget.Year}}&month={{.Budget.Month}}" class="btn">← Back</a>
+</div>
+
+<div class="card">
+  <form method="POST" action="/budget/category/create">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+    <input type="hidden" name="budget_id" value="{{.Budget.ID}}" />
+    <input type="hidden" name="sort_order" value="{{.SortOrder}}" />
+
+    <div class="formgrid cols-2">
+      <div>
+        <label>Category name</label>
+        <input name="name" type="text" placeholder="e.g. Groceries, Rent, Debt payoff" required />
+      </div>
+      <div>
+        <label>Monthly limit ($)</label>
+        <input name="limit_dollars" type="number" step="0.01" min="0" value="0" />
+        <div class="help">Maximum you plan to spend in this category this month.</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <label class="checkbox-option">
+      <input type="checkbox" name="is_debt_payoff" value="1" />
+      <span class="checkbox-option-content">
+        <span class="checkbox-option-label">Extra for debt (link to payoff plan)</span>
+        <div class="help">Mark this category as &quot;extra toward debt&quot; so the budget view can show a suggested amount from your payoff plan.</div>
+      </span>
+    </label>
+
+    <div class="spacer"></div>
+
+    <button type="submit" class="btn primary">Add category</button>
+  </form>
+</div>
+{{end}}
+{{define "budget_category_add.html"}}{{template "layout" .}}{{end}}

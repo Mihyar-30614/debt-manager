@@ -1,0 +1,77 @@
+{{define "payment_new_content"}}
+<div class="row">
+  <div>
+    <h1>Record payment</h1>
+    <p>Record a payment for any active debt.</p>
+  </div>
+  <a href="/" class="btn">← Back</a>
+</div>
+
+<div class="spacer"></div>
+
+{{if .ActiveDebts}}
+<div class="card">
+  <form method="POST" action="/payments/add" id="payment-form">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+    <input type="hidden" name="redirect_to" value="payments" />
+    
+    <div class="formgrid cols-3">
+      <div>
+        <label>Debt</label>
+        <select name="debt_id" id="payment-debt" required autofocus>
+          <option value="">Select debt...</option>
+          {{range .ActiveDebts}}
+          <option value="{{.ID}}" data-min="{{.MinPaymentCents}}" data-balance="{{.BalanceCents}}">{{.Name}} ({{money .BalanceCents}})</option>
+          {{end}}
+        </select>
+      </div>
+      <div>
+        <label>Date</label>
+        <input name="paid_on" type="date" id="payment-date" required />
+      </div>
+      <div>
+        <label>Amount ($)</label>
+        <div style="display: flex; gap: 8px; align-items: flex-start;">
+          <input name="amount_dollars" type="number" step="0.01" min="0.01" id="payment-amount" required placeholder="0.00" style="flex: 1;" />
+          <button type="button" class="btn ghost" id="payment-min-btn" style="white-space: nowrap; padding: 0 12px;" onclick="setMinPayment()">Min</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div>
+      <label>Note</label>
+      <input name="note" placeholder="Optional payment note" />
+    </div>
+
+    <div class="spacer"></div>
+
+    <button class="btn primary" type="submit">Record payment</button>
+  </form>
+</div>
+<script>
+  // Set today's date as default
+  document.getElementById('payment-date').valueAsDate = new Date();
+  
+  function setMinPayment() {
+    const select = document.getElementById('payment-debt');
+    const amountInput = document.getElementById('payment-amount');
+    const selectedOption = select.options[select.selectedIndex];
+    if (selectedOption.value && selectedOption.dataset.min) {
+      const minCents = parseInt(selectedOption.dataset.min);
+      const balanceCents = parseInt(selectedOption.dataset.balance);
+      const minAmount = Math.min(minCents, balanceCents) / 100.0;
+      amountInput.value = minAmount.toFixed(2);
+    }
+  }
+</script>
+{{else}}
+<div class="card empty-state">
+  <h3>No active debts</h3>
+  <p>Add a debt first before recording payments.</p>
+  <a href="/debts/new" class="btn primary">Add debt</a>
+</div>
+{{end}}
+{{end}}
+{{define "payment_new.html"}}{{template "layout" .}}{{end}}

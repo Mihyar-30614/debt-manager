@@ -1,0 +1,123 @@
+{{define "debt_edit_content"}}
+<div class="row">
+  <div>
+    <h1>Edit debt</h1>
+    <p>Update debt information.</p>
+  </div>
+  <a href="/debts/view?id={{.Debt.ID}}" class="btn">← Back</a>
+</div>
+
+<div class="card">
+  <form method="POST" action="/debts/update" id="debt-form">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+    <input type="hidden" name="id" value="{{.Debt.ID}}" />
+    
+    <div class="formgrid cols-2">
+      <div>
+        <label>Name</label>
+        <input name="name" id="debt-name-input" placeholder="Visa, Student Loan..." value="{{.Debt.Name}}" required autofocus />
+        <div class="help">Example: "RBC Visa"</div>
+      </div>
+
+      <div>
+        <label>Type</label>
+        <select name="kind" required>
+          <option value="">Select type...</option>
+          <option value="card" {{if eq .Debt.Kind "card"}}selected{{end}}>💳 Credit Card</option>
+          <option value="line_of_credit" {{if eq .Debt.Kind "line_of_credit"}}selected{{end}}>📊 Line of Credit</option>
+          <option value="personal_loan" {{if eq .Debt.Kind "personal_loan"}}selected{{end}}>👤 Personal Loan</option>
+          <option value="auto_loan" {{if eq .Debt.Kind "auto_loan"}}selected{{end}}>🚗 Auto Loan</option>
+          <option value="student_loan" {{if eq .Debt.Kind "student_loan"}}selected{{end}}>🎓 Student Loan</option>
+          <option value="mortgage" {{if eq .Debt.Kind "mortgage"}}selected{{end}}>🏠 Mortgage</option>
+          <option value="other_loan" {{if eq .Debt.Kind "other_loan"}}selected{{end}}>📋 Other Loan</option>
+        </select>
+        <div class="help">Select the type of debt</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="formgrid cols-4">
+      <div>
+        <label>Balance ($)</label>
+        <input
+          name="balance_dollars"
+          type="number"
+          step="0.01"
+          min="0"
+          value="{{dollars .Debt.BalanceCents}}"
+          required
+        />
+      </div>
+      <div>
+        <label>APR (%)</label>
+        <input
+          name="apr_percent"
+          type="number"
+          step="0.01"
+          min="0"
+          value="{{printf "%.2f" (div (float .Debt.APRBps) 100.0)}}"
+          required
+        />
+      </div>
+      <div>
+        <label>Minimum payment ($)</label>
+        <input
+          name="min_payment_dollars"
+          type="number"
+          step="0.01"
+          min="0"
+          value="{{dollars .Debt.MinPaymentCents}}"
+          required
+        />
+        <div class="help">Required minimum payment</div>
+      </div>
+      <div>
+        <label>Payment ($)</label>
+        <input
+          name="payment_dollars"
+          type="number"
+          step="0.01"
+          min="0"
+          value="{{if gt .Debt.PaymentCents 0}}{{dollars .Debt.PaymentCents}}{{end}}"
+        />
+        <div class="help">Your typical payment amount (optional)</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="formgrid cols-4">
+      <div>
+        <label>Due day (1–28)</label>
+        <input
+          name="due_day"
+          type="number"
+          min="1"
+          max="28"
+          value="{{.Debt.DueDay}}"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div>
+      <label>Notes</label>
+      <textarea
+        name="notes"
+        rows="3"
+        placeholder="Account number, contact info, or any other notes..."
+      >{{.Debt.Notes}}</textarea>
+      <div class="help">Optional notes about this debt</div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <button class="btn primary" type="submit">Update debt</button>
+    <a class="btn ghost" href="/debts/view?id={{.Debt.ID}}">Cancel</a>
+  </form>
+</div>
+{{end}}
+{{define "debt_edit.html"}}{{template "layout" .}}{{end}}

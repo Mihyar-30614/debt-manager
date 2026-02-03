@@ -1,0 +1,39 @@
+{{define "budget_expense_add_content"}}
+<div class="row">
+  <div>
+    <h1>Record expense</h1>
+    <p>Category: {{.Category.Name}} — {{monthName .Budget.Month}} {{.Budget.Year}}</p>
+  </div>
+  <a href="/budget/view?year={{.Budget.Year}}&month={{.Budget.Month}}" class="btn">← Back</a>
+</div>
+
+<div class="card">
+  <form method="POST" action="/budget/expense/create">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+    <input type="hidden" name="category_id" value="{{.Category.ID}}" />
+
+    <div class="formgrid cols-2">
+      <div>
+        <label>Date</label>
+        <input name="spent_on" type="date" required />
+      </div>
+      <div>
+        <label>Amount ($)</label>
+        <input name="amount_dollars" type="number" step="0.01" min="0.01" required />
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div>
+      <label>Note (optional)</label>
+      <input name="note" type="text" placeholder="e.g. Grocery run" />
+    </div>
+
+    <div class="spacer"></div>
+
+    <button type="submit" class="btn primary">Record expense</button>
+  </form>
+</div>
+{{end}}
+{{define "budget_expense_add.html"}}{{template "layout" .}}{{end}}

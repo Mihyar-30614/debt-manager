@@ -1,0 +1,47 @@
+{{define "payment_edit_content"}}
+<div class="row">
+  <div>
+    <h1>Edit payment</h1>
+    <p>Update payment information.</p>
+  </div>
+  <a href="/debts/view?id={{.Debt.ID}}" class="btn">← Back</a>
+</div>
+
+<div class="card">
+  <form method="POST" action="/payments/update" id="payment-form">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+    <input type="hidden" name="id" value="{{.Payment.ID}}" />
+    
+    <div class="formgrid cols-2">
+      <div>
+        <label>Date</label>
+        <input name="paid_on" type="date" value="{{.Payment.PaidOn.Format "2006-01-02"}}" required />
+      </div>
+      <div>
+        <label>Amount ($)</label>
+        <input
+          name="amount_dollars"
+          type="number"
+          step="0.01"
+          min="0.01"
+          value="{{dollars .Payment.AmountCents}}"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div>
+      <label>Note</label>
+      <input name="note" placeholder="Optional" value="{{.Payment.Note}}" />
+    </div>
+
+    <div class="spacer"></div>
+
+    <button class="btn primary" type="submit">Update payment</button>
+    <a class="btn ghost" href="/debts/view?id={{.Debt.ID}}">Cancel</a>
+  </form>
+</div>
+{{end}}
+{{define "payment_edit.html"}}{{template "layout" .}}{{end}}
