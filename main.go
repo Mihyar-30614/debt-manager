@@ -6,6 +6,7 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
+	"crypto/tls"
 	"database/sql"
 	"encoding/base64"
 	"fmt"
@@ -584,8 +585,18 @@ func (a *App) sendPasswordResetEmail(to, resetURL string) error {
 	smtpHost := getEnv("SMTP_HOST", env)
 	smtpPort := getEnv("SMTP_PORT", env)
 	smtpUser := getEnv("SMTP_USER", env)
-	smtpPass := getEnv("SMTP_PASSWORD", env)
-	smtpFrom := getEnv("SMTP_FROM", env)
+	smtpPass := getEnv("SMTP_PASS", env)
+	if smtpPass == "" {
+		smtpPass = getEnv("SMTP_PASSWORD", env)
+	}
+	fromAddr := getEnv("FROM_EMAIL", env)
+	if fromAddr == "" {
+		fromAddr = getEnv("SMTP_FROM", env)
+	}
+	if fromAddr == "" {
+		fromAddr = smtpUser
+	}
+	fromName := strings.Trim(strings.TrimSpace(getEnv("FROM_EMAIL_NAME", env)), `"`)
 
 	// If SMTP not configured, log the link instead
 	if smtpHost == "" || smtpUser == "" || smtpPass == "" {
@@ -593,11 +604,14 @@ func (a *App) sendPasswordResetEmail(to, resetURL string) error {
 		return nil
 	}
 
-	if smtpFrom == "" {
-		smtpFrom = smtpUser
-	}
 	if smtpPort == "" {
 		smtpPort = "587"
+	}
+
+	// From header: "Display Name" <email> or just email
+	fromHeader := fromAddr
+	if fromName != "" {
+		fromHeader = fmt.Sprintf("%q <%s>", fromName, fromAddr)
 	}
 
 	subject := "Password Reset - Debt Manager"
@@ -616,7 +630,7 @@ If you didn't request this, please ignore this email.
 Debt Manager`, resetURL)
 
 	msg := []byte(fmt.Sprintf("To: %s\r\n", to) +
-		fmt.Sprintf("From: %s\r\n", smtpFrom) +
+		fmt.Sprintf("From: %s\r\n", fromHeader) +
 		fmt.Sprintf("Subject: %s\r\n", subject) +
 		"Content-Type: text/plain; charset=UTF-8\r\n" +
 		"\r\n" +
@@ -625,7 +639,49 @@ Debt Manager`, resetURL)
 	addr := fmt.Sprintf("%s:%s", smtpHost, smtpPort)
 	auth := smtp.PlainAuth("", smtpUser, smtpPass, smtpHost)
 
-	return smtp.SendMail(addr, auth, smtpFrom, []string{to}, msg)
+	useTLS := smtpPort == "465" || strings.ToLower(getEnv("SMTP_SECURE", env)) == "true"
+	if useTLS {
+		return sendMailTLS(smtpHost, addr, auth, fromAddr, []string{to}, msg)
+	}
+	return smtp.SendMail(addr, auth, fromAddr, []string{to}, msg)
+}
+
+// sendMailTLS sends email over implicit TLS (e.g. port 465).
+func sendMailTLS(host, addr string, auth smtp.Auth, from string, to []string, msg []byte) error {
+	conn, err := tls.Dial("tcp", addr, &tls.Config{ServerName: host})
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	client, err := smtp.NewClient(conn, host)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+	if auth != nil {
+		if err = client.Auth(auth); err != nil {
+			return err
+		}
+	}
+	if err = client.Mail(from); err != nil {
+		return err
+	}
+	for _, r := range to {
+		if err = client.Rcpt(r); err != nil {
+			return err
+		}
+	}
+	w, err := client.Data()
+	if err != nil {
+		return err
+	}
+	if _, err = w.Write(msg); err != nil {
+		return err
+	}
+	if err = w.Close(); err != nil {
+		return err
+	}
+	return client.Quit()
 }
 
 func (a *App) setFlash(w http.ResponseWriter, message string, isError bool) {

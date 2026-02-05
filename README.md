@@ -103,10 +103,12 @@ Create the database before first run: `createdb debtapp` (or use your DB_NAME).
 
 **SMTP Configuration (optional, for password reset emails):**
 - `SMTP_HOST` - SMTP server hostname
-- `SMTP_PORT` - SMTP server port (default: 587)
+- `SMTP_PORT` - SMTP server port (default: 587; use 465 for implicit TLS)
+- `SMTP_SECURE` - Set to `true` for port 465 / implicit TLS
 - `SMTP_USER` - SMTP username/email
-- `SMTP_PASSWORD` - SMTP password
-- `SMTP_FROM` - From email address (defaults to SMTP_USER if not set)
+- `SMTP_PASS` - SMTP app password (or `SMTP_PASSWORD` as fallback)
+- `FROM_EMAIL` - From email address (defaults to SMTP_USER if unset; `SMTP_FROM` as fallback)
+- `FROM_EMAIL_NAME` - Display name for the From header (e.g. "Debt Manager")
 
 If SMTP is not configured, password reset links will be logged to the console.
 
