@@ -1,10 +1,13 @@
 {{define "payment_edit_content"}}
+<div class="breadcrumb">
+  <a href="/">Dashboard</a> → <a href="/payments">Payments</a> → <a href="/debts/view?id={{.Debt.ID}}">{{.Debt.Name}}</a> → Edit payment
+</div>
 <div class="row">
   <div>
     <h1>Edit payment</h1>
-    <p>Update payment information.</p>
+    <p>{{.Debt.Name}} · {{.Payment.PaidOn.Format "2006-01-02"}}</p>
   </div>
-  <a href="/debts/view?id={{.Debt.ID}}" class="btn">← Back</a>
+  <a href="/debts/view?id={{.Debt.ID}}" class="btn ghost">← Back to debt</a>
 </div>
 
 <div class="card">
@@ -39,8 +42,10 @@
 
     <div class="spacer"></div>
 
-    <button class="btn primary" type="submit">Update payment</button>
-    <a class="btn ghost" href="/debts/view?id={{.Debt.ID}}">Cancel</a>
+    <div class="page-actions">
+      <button class="btn primary" type="submit">Update payment</button>
+      <a class="btn ghost" href="/debts/view?id={{.Debt.ID}}">Cancel</a>
+    </div>
   </form>
 </div>
 {{end}}

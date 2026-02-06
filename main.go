@@ -245,6 +245,7 @@ func main() {
 		"mul":      func(a, b int64) int64 { return a * b },
 		"sub":      func(a, b int64) int64 { return a - b },
 		"div":      func(a, b float64) float64 { return a / b },
+		"pct":      func(spent, limit int64) int64 { if limit == 0 { return 0 }; return spent * 100 / limit },
 		"float":    func(i int64) float64 { return float64(i) },
 		"debtKind": formatDebtKind,
 		"now":      func() time.Time { return time.Now() },

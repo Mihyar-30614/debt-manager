@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 
@@ -44,22 +45,24 @@ func (a *App) handleIndex(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	// Only pass activeDebts if there are any (for showing the shortcut button)
+	paymentsThisMonthCount, paymentsThisMonthTotal, _ := PaymentsThisMonth(a.db, userID)
 
 	flash, flashType := a.getFlash(r)
 	a.render(w, http.StatusOK, "index.html", map[string]any{
-		"Debts":          debts,
-		"ActiveDebts":    activeDebts,
-		"Total":          total,
-		"ActiveTotal":    activeTotal,
-		"SearchQuery":    searchQuery,
-		"KindFilter":     kindFilter,
-		"StatusFilter":   statusFilter,
-		"SortBy":         sortBy,
-		"Flash":          flash,
-		"FlashType":      flashType,
-		"CSRFToken":      a.getCSRFToken(r),
-		"ContentTemplate": "index_content",
+		"Debts":                 debts,
+		"ActiveDebts":           activeDebts,
+		"Total":                 total,
+		"ActiveTotal":           activeTotal,
+		"PaymentsThisMonthCount": paymentsThisMonthCount,
+		"PaymentsThisMonthTotal": paymentsThisMonthTotal,
+		"SearchQuery":           searchQuery,
+		"KindFilter":            kindFilter,
+		"StatusFilter":          statusFilter,
+		"SortBy":                sortBy,
+		"Flash":                 flash,
+		"FlashType":             flashType,
+		"CSRFToken":             a.getCSRFToken(r),
+		"ContentTemplate":       "index_content",
 	})
 }
 
@@ -192,7 +195,7 @@ func (a *App) handleDebtCreate(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/debts/new", http.StatusSeeOther)
 		return
 	}
-	a.setFlash(w, "Debt created successfully", false)
+	a.setFlash(w, "Debt added. You can record payments from its page.", false)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -219,14 +222,25 @@ func (a *App) handleDebtView(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", 500)
 		return
 	}
+	now := time.Now().UTC()
+	var thisMonthCount int
+	var thisMonthTotal int64
+	for _, p := range payments {
+		if p.PaidOn.Year() == now.Year() && p.PaidOn.Month() == now.Month() {
+			thisMonthCount++
+			thisMonthTotal += p.AmountCents
+		}
+	}
 	flash, flashType := a.getFlash(r)
 	a.render(w, http.StatusOK, "debt_view.html", map[string]any{
-		"Debt":           debt,
-		"Payments":       payments,
-		"Flash":          flash,
-		"FlashType":      flashType,
-		"CSRFToken":      a.getCSRFToken(r),
-		"ContentTemplate": "debt_view_content",
+		"Debt":               debt,
+		"Payments":           payments,
+		"ThisMonthCount":     thisMonthCount,
+		"ThisMonthTotal":     thisMonthTotal,
+		"Flash":              flash,
+		"FlashType":          flashType,
+		"CSRFToken":          a.getCSRFToken(r),
+		"ContentTemplate":    "debt_view_content",
 	})
 }
 
@@ -380,7 +394,7 @@ func (a *App) handleDebtUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, fmt.Sprintf("/debts/edit?id=%d", id), http.StatusSeeOther)
 		return
 	}
-	a.setFlash(w, "Debt updated successfully", false)
+	a.setFlash(w, "Debt updated. Your changes are saved.", false)
 	http.Redirect(w, r, fmt.Sprintf("/debts/view?id=%d", id), http.StatusSeeOther)
 }
 
@@ -405,7 +419,7 @@ func (a *App) handleDebtDelete(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, fmt.Sprintf("/debts/view?id=%d", id), http.StatusSeeOther)
 		return
 	}
-	a.setFlash(w, "Debt deleted successfully", false)
+	a.setFlash(w, "Debt removed. Associated payments were deleted.", false)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 

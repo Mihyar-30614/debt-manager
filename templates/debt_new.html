@@ -1,9 +1,13 @@
 {{define "debt_new_content"}}
+<div class="breadcrumb">
+  <a href="/">Dashboard</a> → Add debt
+</div>
 <div class="row">
   <div>
     <h1>Add debt</h1>
     <p>Create a debt entry. Values are local-only.</p>
   </div>
+  <a href="/" class="btn ghost">← Dashboard</a>
 </div>
 
 <div class="card">
@@ -56,6 +60,7 @@
           value="19.99"
           required
         />
+        <div class="help">Annual percentage rate — the interest rate on your statement.</div>
       </div>
       <div>
         <label>Minimum payment ($)</label>
@@ -95,6 +100,7 @@
           value="15"
           required
         />
+        <div class="help">Day of the month your payment is due (e.g. 15 = 15th).</div>
       </div>
     </div>
 
@@ -112,8 +118,10 @@
 
     <div class="spacer"></div>
 
-    <button class="btn primary" type="submit">Create debt</button>
-    <a class="btn ghost" href="/">Cancel</a>
+    <div class="page-actions">
+      <button class="btn primary" type="submit">Create debt</button>
+      <a class="btn ghost" href="/">Cancel</a>
+    </div>
   </form>
 </div>
 {{end}}

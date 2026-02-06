@@ -50,7 +50,7 @@ func (a *App) handlePaymentAdd(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	a.setFlash(w, "Payment added successfully", false)
+	a.setFlash(w, "Payment recorded. The debt balance has been updated.", false)
 	redirectTo := r.FormValue("redirect_to")
 	if redirectTo == "payments" {
 		http.Redirect(w, r, "/payments", http.StatusSeeOther)
@@ -135,7 +135,7 @@ func (a *App) handlePaymentUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, fmt.Sprintf("/payments/edit?id=%d", paymentID), http.StatusSeeOther)
 		return
 	}
-	a.setFlash(w, "Payment updated successfully", false)
+	a.setFlash(w, "Payment updated. Balance has been recalculated.", false)
 	http.Redirect(w, r, fmt.Sprintf("/debts/view?id=%d", payment.DebtID), http.StatusSeeOther)
 }
 
@@ -167,7 +167,7 @@ func (a *App) handlePaymentDelete(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, fmt.Sprintf("/debts/view?id=%d", debtID), http.StatusSeeOther)
 		return
 	}
-	a.setFlash(w, "Payment deleted successfully", false)
+	a.setFlash(w, "Payment removed. The debt balance has been adjusted.", false)
 	http.Redirect(w, r, fmt.Sprintf("/debts/view?id=%d", debtID), http.StatusSeeOther)
 }
 
@@ -212,12 +212,15 @@ func (a *App) handlePayments(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", 500)
 		return
 	}
+	paymentsThisMonthCount, paymentsThisMonthTotal, _ := PaymentsThisMonth(a.db, userID)
 	flash, flashType := a.getFlash(r)
 	a.render(w, http.StatusOK, "payments.html", map[string]any{
-		"Payments":       payments,
-		"Flash":          flash,
-		"FlashType":      flashType,
-		"CSRFToken":      a.getCSRFToken(r),
-		"ContentTemplate": "payments_content",
+		"Payments":                payments,
+		"PaymentsThisMonthCount":  paymentsThisMonthCount,
+		"PaymentsThisMonthTotal":  paymentsThisMonthTotal,
+		"Flash":                   flash,
+		"FlashType":               flashType,
+		"CSRFToken":               a.getCSRFToken(r),
+		"ContentTemplate":         "payments_content",
 	})
 }

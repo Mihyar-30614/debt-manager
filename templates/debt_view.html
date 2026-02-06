@@ -1,10 +1,13 @@
 {{define "debt_view_content"}}
+<div class="breadcrumb">
+  <a href="/">Dashboard</a> → {{.Debt.Name}}
+</div>
 <div class="row">
   <div>
     <h1>{{.Debt.Name}}</h1>
     <p>Manage this debt and record payments.</p>
   </div>
-  <a href="/" class="btn">← Back</a>
+  <a href="/" class="btn ghost">← Dashboard</a>
 </div>
 
 <div class="grid cols-2">
@@ -53,7 +56,7 @@
 
     <div class="spacer"></div>
 
-    <div class="row" style="gap: 8px;">
+    <div class="budget-actions">
       <a href="/debts/edit?id={{.Debt.ID}}" class="btn">Edit</a>
       <form method="POST" action="/debts/toggle" style="margin:0;">
         <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
@@ -112,7 +115,11 @@
 </div>
 
 <h2>Payments</h2>
+{{if gt .ThisMonthCount 0}}
+<p class="summary-line">This month: <strong>{{.ThisMonthCount}}</strong> {{if eq .ThisMonthCount 1}}payment{{else}}payments{{end}} ({{money .ThisMonthTotal}} total).</p>
+{{end}}
 {{if .Payments}}
+<div class="table-wrapper">
 <table>
   <thead>
     <tr>
@@ -129,12 +136,12 @@
       <td>{{money .AmountCents}}</td>
       <td>{{.Note}}</td>
       <td>
-        <div class="row" style="gap: 8px; justify-content: flex-start;">
-          <a href="/payments/edit?id={{.ID}}" class="btn" style="padding: 6px 10px; font-size: 12px;">Edit</a>
-          <form method="POST" action="/payments/delete" style="margin:0;" onsubmit="return confirm('Are you sure you want to delete this payment? The debt balance will be adjusted.');">
+        <div class="budget-actions">
+          <a href="/payments/edit?id={{.ID}}" class="btn">Edit</a>
+          <form method="POST" action="/payments/delete" style="margin:0;" onsubmit="return confirm('Delete this payment? The debt balance will be adjusted.');">
             <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}" />
             <input type="hidden" name="id" value="{{.ID}}" />
-            <button class="btn danger" type="submit" style="padding: 6px 10px; font-size: 12px;">Delete</button>
+            <button class="btn danger" type="submit">Delete</button>
           </form>
         </div>
       </td>
@@ -142,10 +149,11 @@
     {{end}}
   </tbody>
 </table>
+</div>
 {{else}}
 <div class="card empty-state" style="padding: 40px 20px;">
-  <h3>No payments yet</h3>
-  <p>Record your first payment above.</p>
+  <h3>No payments recorded yet</h3>
+  <p>Use the form above to record a payment. The balance will update automatically.</p>
 </div>
 {{end}}
 {{end}}

@@ -186,7 +186,7 @@ func (a *App) handleBudgetUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, fmt.Sprintf("/budget/view?year=%d&month=%d", year, month), http.StatusSeeOther)
 		return
 	}
-	a.setFlash(w, "Budget updated.", false)
+	a.setFlash(w, "Income saved. You can add or edit categories below.", false)
 	http.Redirect(w, r, fmt.Sprintf("/budget/view?year=%d&month=%d", year, month), http.StatusSeeOther)
 }
 
@@ -253,7 +253,7 @@ func (a *App) handleBudgetCategoryCreate(w http.ResponseWriter, r *http.Request)
 		http.Redirect(w, r, fmt.Sprintf("/budget/view?year=%d&month=%d", budget.Year, budget.Month), http.StatusSeeOther)
 		return
 	}
-	a.setFlash(w, "Category added.", false)
+	a.setFlash(w, "Category added. You can set a limit and record expenses.", false)
 	http.Redirect(w, r, fmt.Sprintf("/budget/view?year=%d&month=%d", budget.Year, budget.Month), http.StatusSeeOther)
 }
 
@@ -319,7 +319,7 @@ func (a *App) handleBudgetCategoryUpdate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	budget, _ := getBudget(a.db, userID, cat.BudgetID)
-	a.setFlash(w, "Category updated.", false)
+	a.setFlash(w, "Category updated. Your changes are saved.", false)
 	http.Redirect(w, r, fmt.Sprintf("/budget/view?year=%d&month=%d", budget.Year, budget.Month), http.StatusSeeOther)
 }
 
@@ -455,7 +455,7 @@ func (a *App) handleBudgetExpenseCreate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	budget, _ := getBudget(a.db, userID, cat.BudgetID)
-	a.setFlash(w, "Expense recorded.", false)
+	a.setFlash(w, "Expense recorded. Category spending has been updated.", false)
 	http.Redirect(w, r, fmt.Sprintf("/budget/view?year=%d&month=%d", budget.Year, budget.Month), http.StatusSeeOther)
 }
 
@@ -530,7 +530,7 @@ func (a *App) handleBudgetExpenseUpdate(w http.ResponseWriter, r *http.Request) 
 	}
 	cat, _ := getBudgetCategory(a.db, userID, exp.BudgetCategoryID)
 	budget, _ := getBudget(a.db, userID, cat.BudgetID)
-	a.setFlash(w, "Expense updated.", false)
+	a.setFlash(w, "Expense updated. Your changes are saved.", false)
 	http.Redirect(w, r, fmt.Sprintf("/budget/view?year=%d&month=%d", budget.Year, budget.Month), http.StatusSeeOther)
 }
 

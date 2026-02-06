@@ -1,9 +1,13 @@
 {{define "plan_content"}}
+<div class="breadcrumb">
+  <a href="/">Dashboard</a> → Payoff plan
+</div>
 <div class="row">
   <div>
     <h1>Payoff plan</h1>
     <p>Estimate payoff timeline with monthly interest compounding.</p>
   </div>
+  <a href="/" class="btn ghost">← Dashboard</a>
 </div>
 
 <div class="grid cols-2">
@@ -26,7 +30,7 @@
             <option value="avalanche" {{if eq .Strategy "avalanche"}}selected{{end}}>avalanche (highest APR)</option>
             <option value="snowball" {{if eq .Strategy "snowball"}}selected{{end}}>snowball (smallest balance)</option>
           </select>
-          <div class="help">Avalanche saves more interest; snowball boosts momentum.</div>
+          <div class="help">Avalanche: pay highest APR first (saves more interest). Snowball: pay smallest balance first (quick wins).</div>
         </div>
       </div>
 
@@ -40,17 +44,18 @@
       <div class="label">Estimated payoff</div>
       <div class="value">{{.Plan.PayoffMonths}} months</div>
     </div>
+    <p class="summary-line" style="margin-top: var(--space-3);">At this rate you'll be debt-free in about <strong>{{.Plan.PayoffMonths}}</strong> {{if eq .Plan.PayoffMonths 1}}month{{else}}months{{end}}.</p>
     <div class="spacer"></div>
     <div class="row">
       <span class="badge warn">Estimated total interest</span>
       <span style="font-weight:800; font-size:18px;">{{money .Plan.TotalInterestCents}}</span>
     </div>
-    <div class="help">This is a simplified estimate (monthly compounding).</div>
+    <div class="help">Interest you'd pay if you stick to this plan. This is a simplified estimate (monthly compounding).</div>
   </div>
 </div>
 
 <h2>First 12 months</h2>
-<div style="overflow-x: auto;">
+<div class="table-wrapper">
 <table>
   <thead>
     <tr>

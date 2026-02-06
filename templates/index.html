@@ -1,10 +1,14 @@
 {{define "index_content"}}
+<div class="breadcrumb">Dashboard</div>
 <div class="row">
   <div>
     <h1>Dashboard</h1>
     <p>Balances, payments, and payoff planning in one place.</p>
+    {{if gt .PaymentsThisMonthCount 0}}
+    <p class="summary-line">You've made <strong>{{.PaymentsThisMonthCount}}</strong> {{if eq .PaymentsThisMonthCount 1}}payment{{else}}payments{{end}} this month ({{money .PaymentsThisMonthTotal}} total).</p>
+    {{end}}
   </div>
-  <div style="display: flex; gap: 8px;">
+  <div class="page-actions">
     {{if .ActiveDebts}}
     <a href="/payments/new" class="btn primary">+ Record payment<span class="keyboard-hint">p</span></a>
     {{end}}
@@ -15,6 +19,7 @@
 <div class="spacer"></div>
 
 <div class="card">
+  <h2 style="margin-top: 0">Filter debts</h2>
   <form method="GET" action="/" class="search-form">
     <div class="search-field">
       <label>Search</label>
@@ -67,12 +72,14 @@
 
 <div class="grid cols-2">
   <div class="card stat">
-    <div class="label">Total balance (all)</div>
+    <div class="label">Total balance (all debts)</div>
     <div class="value">{{money .Total}}</div>
+    <div class="help">Includes closed debts.</div>
   </div>
   <div class="card stat">
     <div class="label">Active balance</div>
     <div class="value">{{money .ActiveTotal}}</div>
+    <div class="help">Debts you're currently paying down.</div>
   </div>
 </div>
 
@@ -83,6 +90,7 @@
 {{$kindFilter := .KindFilter}}
 {{$statusFilter := .StatusFilter}}
 {{$sortBy := .SortBy}}
+<div class="table-wrapper">
 <table>
   <thead>
     <tr>
@@ -151,15 +159,16 @@
     {{end}}
   </tbody>
 </table>
+</div>
 {{else}}
 <div class="card empty-state">
   {{if or .SearchQuery .KindFilter .StatusFilter}}
-  <h3>No debts found</h3>
-  <p>No debts match your current filters.</p>
+  <h3>No debts match your filters</h3>
+  <p>Try clearing the filters to see all debts, or add a new debt.</p>
   <a href="/" class="btn primary">Clear filters</a>
   {{else}}
-  <h3>No debts yet</h3>
-  <p>Get started by adding your first debt to track.</p>
+  <h3>You're all set to add your first debt</h3>
+  <p>Add a credit card, loan, or other debt to start tracking balances and payments. Your data stays on your device.</p>
   <a href="/debts/new" class="btn primary">+ Add your first debt</a>
   {{end}}
 </div>

@@ -1,10 +1,13 @@
 {{define "budget_category_edit_content"}}
+<div class="budget-breadcrumb">
+  <a href="/budget">Budget</a> → <a href="/budget/view?year={{.Budget.Year}}&month={{.Budget.Month}}">{{monthName .Budget.Month}} {{.Budget.Year}}</a> → {{.Category.Name}}
+</div>
 <div class="row">
   <div>
-    <h1>Edit category</h1>
-    <p>Budget: {{monthName .Budget.Month}} {{.Budget.Year}}</p>
+    <h1>Edit {{.Category.Name}}</h1>
+    <p>{{monthName .Budget.Month}} {{.Budget.Year}}</p>
   </div>
-  <a href="/budget/view?year={{.Budget.Year}}&month={{.Budget.Month}}" class="btn">← Back</a>
+  <a href="/budget/view?year={{.Budget.Year}}&month={{.Budget.Month}}" class="btn ghost">← Back</a>
 </div>
 
 <div class="card">
@@ -26,15 +29,15 @@
 
     <div class="spacer"></div>
 
-    <label class="checkbox-option">
-      <input type="checkbox" name="is_debt_payoff" value="1" {{if .Category.IsDebtPayoff}}checked{{end}} />
-      <span class="checkbox-option-content">
-        <span class="checkbox-option-label">Extra for debt (link to payoff plan)</span>
-        <div class="help">Shows a suggested amount on the budget view and ties this category to your payoff plan.</div>
-      </span>
-    </label>
-
-    <div class="spacer"></div>
+    <div class="budget-callout" style="padding: var(--space-4); margin-bottom: var(--space-4);">
+      <label class="checkbox-option" style="margin: 0;">
+        <input type="checkbox" name="is_debt_payoff" value="1" {{if .Category.IsDebtPayoff}}checked{{end}} />
+        <span class="checkbox-option-content">
+          <span class="checkbox-option-label">Extra for debt (link to payoff plan)</span>
+          <div class="help">Shows a suggested amount on the budget view and ties this category to your payoff plan.</div>
+        </span>
+      </label>
+    </div>
 
     <button type="submit" class="btn primary">Save</button>
   </form>

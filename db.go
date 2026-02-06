@@ -358,6 +358,18 @@ ORDER BY p.paid_on DESC, p.id DESC`, userID)
 	return out, rows.Err()
 }
 
+// PaymentsThisMonth returns count and total amount (cents) of payments in the current calendar month for the user.
+func PaymentsThisMonth(db *sql.DB, userID int64) (count int, totalCents int64, err error) {
+	err = db.QueryRow(`
+SELECT COUNT(*), COALESCE(SUM(p.amount_cents), 0)
+FROM payments p
+JOIN debts d ON p.debt_id = d.id
+WHERE d.user_id = $1
+  AND p.paid_on >= date_trunc('month', CURRENT_DATE)::date
+  AND p.paid_on < date_trunc('month', CURRENT_DATE)::date + interval '1 month'`, userID).Scan(&count, &totalCents)
+	return count, totalCents, err
+}
+
 func createDebt(db *sql.DB, userID int64, d Debt) (int64, error) {
 	now := time.Now().UTC()
 	err := db.QueryRow(`

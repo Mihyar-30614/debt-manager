@@ -1,10 +1,13 @@
 {{define "budget_expense_edit_content"}}
+<div class="budget-breadcrumb">
+  <a href="/budget">Budget</a> → <a href="/budget/view?year={{.Budget.Year}}&month={{.Budget.Month}}">{{monthName .Budget.Month}} {{.Budget.Year}}</a> → <a href="/budget/category/expenses?category_id={{.Category.ID}}">{{.Category.Name}}</a> → Edit expense
+</div>
 <div class="row">
   <div>
     <h1>Edit expense</h1>
-    <p>Category: {{.Category.Name}} — {{monthName .Budget.Month}} {{.Budget.Year}}</p>
+    <p><span class="badge">{{.Category.Name}}</span> · {{monthName .Budget.Month}} {{.Budget.Year}}</p>
   </div>
-  <a href="/budget/view?year={{.Budget.Year}}&month={{.Budget.Month}}" class="btn">← Back</a>
+  <a href="/budget/category/expenses?category_id={{.Category.ID}}" class="btn ghost">← Back to {{.Category.Name}}</a>
 </div>
 
 <div class="card">
@@ -27,12 +30,12 @@
 
     <div>
       <label>Note (optional)</label>
-      <input name="note" type="text" value="{{.Expense.Note}}" />
+      <input name="note" type="text" value="{{.Expense.Note}}" placeholder="e.g. Grocery run" />
     </div>
 
     <div class="spacer"></div>
 
-    <div class="row" style="gap: 8px;">
+    <div class="budget-actions">
       <button type="submit" class="btn primary">Save</button>
       <form method="POST" action="/budget/expense/delete" style="margin:0;" onsubmit="return confirm('Delete this expense?');">
         <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />

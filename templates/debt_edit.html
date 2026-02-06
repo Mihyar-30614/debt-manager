@@ -1,10 +1,13 @@
 {{define "debt_edit_content"}}
+<div class="breadcrumb">
+  <a href="/">Dashboard</a> → <a href="/debts/view?id={{.Debt.ID}}">{{.Debt.Name}}</a> → Edit
+</div>
 <div class="row">
   <div>
-    <h1>Edit debt</h1>
+    <h1>Edit {{.Debt.Name}}</h1>
     <p>Update debt information.</p>
   </div>
-  <a href="/debts/view?id={{.Debt.ID}}" class="btn">← Back</a>
+  <a href="/debts/view?id={{.Debt.ID}}" class="btn ghost">← Back</a>
 </div>
 
 <div class="card">
@@ -59,6 +62,7 @@
           value="{{printf "%.2f" (div (float .Debt.APRBps) 100.0)}}"
           required
         />
+        <div class="help">Annual percentage rate — the interest rate on your statement.</div>
       </div>
       <div>
         <label>Minimum payment ($)</label>
@@ -98,6 +102,7 @@
           value="{{.Debt.DueDay}}"
           required
         />
+        <div class="help">Day of the month your payment is due (e.g. 15 = 15th).</div>
       </div>
     </div>
 
@@ -115,8 +120,10 @@
 
     <div class="spacer"></div>
 
-    <button class="btn primary" type="submit">Update debt</button>
-    <a class="btn ghost" href="/debts/view?id={{.Debt.ID}}">Cancel</a>
+    <div class="page-actions">
+      <button class="btn primary" type="submit">Update debt</button>
+      <a class="btn ghost" href="/debts/view?id={{.Debt.ID}}">Cancel</a>
+    </div>
   </form>
 </div>
 {{end}}

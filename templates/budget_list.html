@@ -1,12 +1,15 @@
 {{define "budget_list_content"}}
+<div class="budget-breadcrumb">
+  <a href="/">Dashboard</a> → Budget
+</div>
 <div class="row">
   <div>
     <h1>Personal budget</h1>
     <p>Monthly income, categories, and spending. Link extra to your payoff plan.</p>
   </div>
-  <div style="display: flex; gap: 8px;">
-    <a href="/budget/view?year={{.Year}}&month={{.Month}}" class="btn primary">This month ({{monthName .Month}} {{.Year}})</a>
-    <a href="/plan" class="btn">Payoff plan</a>
+  <div class="budget-actions">
+    <a href="/budget/view?year={{.Year}}&month={{.Month}}" class="btn primary">Open {{monthName .Month}} {{.Year}}</a>
+    <a href="/plan" class="btn ghost">Payoff plan</a>
   </div>
 </div>
 
@@ -15,12 +18,14 @@
 {{if .Budgets}}
 <div class="card">
   <h2 style="margin-top: 0">Recent budgets</h2>
+  <p style="margin: 0 0 var(--space-4); color: var(--muted); font-size: 14px;">Click a month to set income and categories.</p>
+  <div class="table-wrapper">
   <table>
     <thead>
       <tr>
         <th>Month</th>
         <th>Income</th>
-        <th>Actions</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -29,17 +34,18 @@
         <td><strong>{{monthName .Month}} {{.Year}}</strong></td>
         <td>{{money .IncomeCents}}</td>
         <td>
-          <a href="/budget/view?year={{.Year}}&month={{.Month}}" class="btn" style="padding: 6px 10px; font-size: 12px;">View</a>
+          <a href="/budget/view?year={{.Year}}&month={{.Month}}" class="btn">View</a>
         </td>
       </tr>
       {{end}}
     </tbody>
   </table>
+  </div>
 </div>
 {{else}}
 <div class="card empty-state">
-  <h3>No budgets yet</h3>
-  <p>Open a month to set income and categories. Start with this month.</p>
+  <h3>Ready to budget</h3>
+  <p>Open a month to set your income and spending categories. You can track limits and expenses, and link extra to your payoff plan.</p>
   <a href="/budget/view?year={{.Year}}&month={{.Month}}" class="btn primary">Open {{monthName .Month}} {{.Year}}</a>
 </div>
 {{end}}

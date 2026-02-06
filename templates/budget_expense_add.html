@@ -1,10 +1,13 @@
 {{define "budget_expense_add_content"}}
+<div class="budget-breadcrumb">
+  <a href="/budget">Budget</a> → <a href="/budget/view?year={{.Budget.Year}}&month={{.Budget.Month}}">{{monthName .Budget.Month}} {{.Budget.Year}}</a> → <a href="/budget/category/expenses?category_id={{.Category.ID}}">{{.Category.Name}}</a> → Record expense
+</div>
 <div class="row">
   <div>
     <h1>Record expense</h1>
-    <p>Category: {{.Category.Name}} — {{monthName .Budget.Month}} {{.Budget.Year}}</p>
+    <p><span class="badge">{{.Category.Name}}</span> · {{monthName .Budget.Month}} {{.Budget.Year}}</p>
   </div>
-  <a href="/budget/view?year={{.Budget.Year}}&month={{.Budget.Month}}" class="btn">← Back</a>
+  <a href="/budget/category/expenses?category_id={{.Category.ID}}" class="btn ghost">← Back to {{.Category.Name}}</a>
 </div>
 
 <div class="card">
@@ -19,7 +22,7 @@
       </div>
       <div>
         <label>Amount ($)</label>
-        <input name="amount_dollars" type="number" step="0.01" min="0.01" required />
+        <input name="amount_dollars" type="number" step="0.01" min="0.01" required placeholder="0.00" />
       </div>
     </div>
 

@@ -1,10 +1,16 @@
 {{define "payment_new_content"}}
+<div class="breadcrumb">
+  <a href="/">Dashboard</a> → <a href="/payments">Payments</a> → Record payment
+</div>
 <div class="row">
   <div>
     <h1>Record payment</h1>
     <p>Record a payment for any active debt.</p>
   </div>
-  <a href="/" class="btn">← Back</a>
+  <div class="page-actions">
+    <a href="/payments" class="btn ghost">← Payments</a>
+    <a href="/" class="btn ghost">Dashboard</a>
+  </div>
 </div>
 
 <div class="spacer"></div>
@@ -70,7 +76,10 @@
 <div class="card empty-state">
   <h3>No active debts</h3>
   <p>Add a debt first before recording payments.</p>
-  <a href="/debts/new" class="btn primary">Add debt</a>
+  <div class="page-actions" style="justify-content: center;">
+    <a href="/debts/new" class="btn primary">+ Add debt</a>
+    <a href="/" class="btn ghost">Dashboard</a>
+  </div>
 </div>
 {{end}}
 {{end}}
