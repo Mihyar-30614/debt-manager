@@ -405,9 +405,15 @@ func (a *App) handleBudgetExpenseAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	budget, _ := getBudget(a.db, userID, cat.BudgetID)
+	spent, _ := totalSpentForCategory(a.db, catID)
+	remainingCents := cat.LimitCents - spent
+	if remainingCents < 0 {
+		remainingCents = 0
+	}
 	a.render(w, http.StatusOK, "budget_expense_add.html", map[string]any{
 		"Category":        cat,
 		"Budget":          budget,
+		"RemainingCents":  remainingCents,
 		"CSRFToken":       a.getCSRFToken(r),
 		"ContentTemplate": "budget_expense_add_content",
 	})

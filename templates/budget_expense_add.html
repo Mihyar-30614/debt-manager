@@ -18,11 +18,36 @@
     <div class="formgrid cols-2">
       <div>
         <label>Date</label>
-        <input name="spent_on" type="date" required />
+        <input name="spent_on" type="date" id="expense-date" required />
       </div>
       <div>
         <label>Amount ($)</label>
-        <input name="amount_dollars" type="number" step="0.01" min="0.01" required placeholder="0.00" />
+        <div style="display: flex; gap: 8px; align-items: flex-start">
+          <input
+            name="amount_dollars"
+            type="number"
+            step="0.01"
+            min="0.01"
+            id="expense-amount"
+            data-max-cents="{{.RemainingCents}}"
+            required
+            placeholder="0.00"
+            style="flex: 1"
+          />
+          {{if gt .RemainingCents 0}}
+          <button
+            type="button"
+            class="btn ghost"
+            style="white-space: nowrap; padding: 0 12px"
+            onclick="setMaxExpense()"
+          >
+            Max
+          </button>
+          {{end}}
+        </div>
+        {{if gt .RemainingCents 0}}
+        <span class="muted" style="font-size: 0.9em">Remaining in {{.Category.Name}}: {{money .RemainingCents}}</span>
+        {{end}}
       </div>
     </div>
 
@@ -38,5 +63,16 @@
     <button type="submit" class="btn primary">Record expense</button>
   </form>
 </div>
+<script>
+  document.getElementById("expense-date").valueAsDate = new Date();
+
+  function setMaxExpense() {
+    const amountInput = document.getElementById("expense-amount");
+    const remainingCents = parseInt(amountInput.dataset.maxCents || "0", 10);
+    if (remainingCents > 0) {
+      amountInput.value = (remainingCents / 100.0).toFixed(2);
+    }
+  }
+</script>
 {{end}}
 {{define "budget_expense_add.html"}}{{template "layout" .}}{{end}}
