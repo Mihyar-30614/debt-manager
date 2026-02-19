@@ -1,14 +1,14 @@
 // Debt Manager PWA - minimal service worker
-const CACHE_NAME = 'debt-manager-v2';
+const CACHE_NAME = 'debt-manager-v3';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll([
-        '/manifest.webmanifest',
-        '/icon-192.png?v=2',
-        '/icon-512.png?v=2'
+        '/manifest.webmanifest?v=3',
+        '/icon-192.png?v=3',
+        '/icon-512.png?v=3'
       ]).catch(() => {});
     })
   );
