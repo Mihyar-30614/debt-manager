@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#070d19" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Debt Manager</title>
     <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
@@ -637,6 +637,59 @@
         font-size: 0.95rem;
       }
 
+      .tax-buckets {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+      .tax-bucket {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: var(--space-4);
+      }
+      .tax-bucket-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: var(--space-2);
+        font-size: 14px;
+      }
+      .tax-bucket-label {
+        color: var(--muted);
+      }
+      .tax-bucket-rate {
+        font-weight: 700;
+        color: var(--brand);
+      }
+      .tax-bucket-bar-wrap {
+        height: 28px;
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        margin-bottom: var(--space-2);
+      }
+      .tax-bucket-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--brand), var(--good));
+        border-radius: var(--radius-sm);
+        min-width: 2px;
+        transition: width 0.35s ease;
+      }
+      .tax-bucket-footer {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .tax-bucket-tax {
+        font-weight: 600;
+        color: var(--text-strong);
+      }
+      .tax-summary .summary-line {
+        margin: 0;
+      }
+
       .keyboard-hint {
         display: inline-block;
         font-size: 10px;
@@ -1210,6 +1263,7 @@
           <a class="navlink" href="/payments">Payments</a>
           <a class="navlink" href="/budget">Budget</a>
           <a class="navlink" href="/plan">Payoff plan</a>
+          <a class="navlink" href="/tax-brackets">Tax calculator</a>
           <a class="navlink" href="/logout">Logout</a>
         </nav>
       </div>

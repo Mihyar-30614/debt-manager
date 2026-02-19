@@ -352,6 +352,7 @@ func main() {
 	mux.HandleFunc("/payments/delete", app.requireAuth(app.requireCSRF(app.handlePaymentDelete)))
 	mux.HandleFunc("/payments", app.requireAuth(app.handlePayments))
 	mux.HandleFunc("/plan", app.requireAuth(app.handlePlan))
+	mux.HandleFunc("/tax-brackets", app.requireAuth(app.handleTaxBrackets))
 	mux.HandleFunc("/budget", app.requireAuth(app.handleBudgetList))
 	mux.HandleFunc("/budget/view", app.requireAuth(app.handleBudgetView))
 	mux.HandleFunc("/budget/update", app.requireAuth(app.requireCSRF(app.handleBudgetUpdate)))

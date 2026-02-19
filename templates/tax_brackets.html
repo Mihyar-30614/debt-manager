@@ -1,0 +1,80 @@
+{{define "tax_brackets_content"}}
+<div class="breadcrumb">
+  <a href="/">Dashboard</a> <span class="breadcrumb-sep">›</span> <span class="current">Tax calculator (Canada)</span>
+</div>
+<div class="row">
+  <div>
+    <h1>Tax brackets explained</h1>
+    <p>Combined federal + provincial income tax ({{.TaxYear}}). Choose a province and enter your taxable income to see how your income fills each bracket and what you pay in each.</p>
+  </div>
+  <a href="/" class="btn ghost">← Dashboard</a>
+</div>
+
+<div class="card">
+  <form method="GET" action="/tax-brackets" class="tax-brackets-form">
+    <div class="formgrid cols-2">
+      <div>
+        <label>Province / territory</label>
+        <select name="province" id="tax-province">
+          {{range .Provinces}}
+          <option value="{{.Code}}" {{if eq $.Province .Code}}selected{{end}}>{{.Name}}</option>
+          {{end}}
+        </select>
+      </div>
+      <div>
+        <label>Taxable income ($)</label>
+        <input name="income" type="number" step="1" min="0" {{if .IncomeFilled}}value="{{.IncomeDollars}}"{{end}} placeholder="e.g. 75000" />
+        <div class="help">Your total taxable income for the year.</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <button type="submit" class="btn primary">Update</button>
+  </form>
+</div>
+
+<div class="spacer"></div>
+
+{{if .IncomeFilled}}
+{{if .Fills}}
+<div class="card tax-summary">
+  <h2 style="margin-top: 0">Summary</h2>
+  <p class="summary-line">
+    On <strong>{{money .IncomeCents}}</strong> taxable income in <strong>{{.ProvinceName}}</strong>, you pay <strong>{{money .TotalTaxCents}}</strong> in combined federal + provincial tax.
+  </p>
+  <p class="help">Rates are marginal: you pay each rate only on the income in that bracket.</p>
+</div>
+
+<h2>How your income fills each bracket</h2>
+<p class="help" style="margin-bottom: var(--space-4);">Each bar is a tax bracket. The filled portion is the amount of your income in that bracket; the number on the right is the tax you pay on that portion.</p>
+
+<div class="tax-buckets">
+  {{range .Fills}}
+  <div class="tax-bucket">
+    <div class="tax-bucket-header">
+      <span class="tax-bucket-label">{{.Label}}</span>
+      <span class="tax-bucket-rate">{{.RatePct}}%</span>
+    </div>
+    <div class="tax-bucket-bar-wrap">
+      <div class="tax-bucket-bar" style="width: {{.FillPct}}%;"></div>
+    </div>
+    <div class="tax-bucket-footer">
+      <span class="tax-bucket-income">{{money .IncomeInBracketCents}} income</span>
+      <span class="tax-bucket-tax">{{money .TaxCents}} tax</span>
+    </div>
+  </div>
+  {{end}}
+</div>
+
+<div class="card" style="margin-top: var(--space-5);">
+  <p class="help" style="margin: 0;">
+    <strong>Note:</strong> This is an estimate for {{.TaxYear}} combined federal + provincial marginal rates on ordinary income. It does not include provincial health premiums (e.g. Ontario), credits, or other deductions. For exact figures, use the CRA’s calculators or your tax software.
+  </p>
+</div>
+{{end}}
+{{else}}
+<div class="card empty-state">
+  <p>Select a province and enter an income, then click Update to see the bracket breakdown.</p>
+</div>
+{{end}}
+{{end}}
+{{define "tax_brackets.html"}}{{template "layout" .}}{{end}}
