@@ -1010,6 +1010,93 @@
         color: var(--brand);
         margin-top: var(--space-1);
       }
+      .budget-categories-list {
+        display: none;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+      .budget-category-card {
+        display: block;
+        padding: var(--space-4);
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        transition: border-color 0.15s ease, background 0.15s ease;
+      }
+      .budget-category-card:hover {
+        border-color: var(--line-strong);
+        background: var(--card-hover);
+      }
+      .budget-category-card-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: var(--space-3);
+      }
+      .budget-category-card-name {
+        font-weight: 600;
+        color: var(--text-strong);
+      }
+      .budget-category-card-remaining {
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+      .budget-category-card-meta {
+        margin-top: var(--space-2);
+        font-size: 14px;
+        color: var(--muted);
+        display: flex;
+        gap: var(--space-3);
+      }
+      .budget-category-card-debt {
+        margin-top: var(--space-2);
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+      }
+      .budget-category-card-debt .help {
+        margin: 0;
+      }
+      .budget-category-card-actions {
+        margin-top: var(--space-3);
+        padding-top: var(--space-2);
+        border-top: 1px solid var(--line);
+      }
+      .budget-list-cards {
+        display: none;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+      .budget-list-card {
+        display: block;
+        padding: var(--space-4);
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.15s ease, background 0.15s ease;
+      }
+      .budget-list-card:hover {
+        border-color: var(--line-strong);
+        background: var(--card-hover);
+      }
+      .budget-list-card-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: var(--space-3);
+      }
+      .budget-list-card-name {
+        font-weight: 600;
+        color: var(--text-strong);
+      }
+      .budget-list-card-income {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text-strong);
+      }
 
       /* Mobile-friendly layout */
       @media (max-width: 768px) {
@@ -1025,7 +1112,6 @@
         }
         .topbar {
           padding: 10px 14px;
-          flex-wrap: wrap;
           gap: 10px;
         }
         .brand {
@@ -1038,45 +1124,22 @@
         .hamburger-btn {
           order: 2;
         }
-        .menu-open .close-icon {
-          display: block;
-        }
-        .menu-open .hamburger-icon {
-          display: none;
-        }
-        nav {
-          position: static;
-          width: 100%;
-          order: 3;
-          flex-direction: column;
-          padding: 12px 0 8px;
-          border-top: 1px solid var(--line);
-          margin-top: 4px;
-          gap: 4px;
-          min-width: 0;
-          border: none;
-          border-radius: 0;
-          box-shadow: none;
-        }
-        header.menu-open nav {
-          display: flex;
-        }
-        .navlink {
-          padding: 12px 14px;
-          font-size: 15px;
-          min-height: 44px;
-          display: flex;
-          align-items: center;
-          -webkit-tap-highlight-color: transparent;
-          border-radius: 12px;
-        }
-        .navlink:hover {
-          background: rgba(15, 23, 42, 0.7);
-        }
         .debts-list {
           display: flex;
         }
         .debts-table {
+          display: none;
+        }
+        .budget-categories-list {
+          display: flex;
+        }
+        .budget-categories-table {
+          display: none;
+        }
+        .budget-list-cards {
+          display: flex;
+        }
+        .budget-list-table {
           display: none;
         }
         main {
@@ -1246,13 +1309,13 @@
   <body>
     <header id="header">
       <div class="topbar">
-        <div class="brand">
+        <a href="/" class="brand" aria-label="Debt Manager – go to dashboard">
           <img src="/static/debt-manager-logo.png?v=2" alt="Debt Manager" class="logo" />
           <div>
             <div class="title">Debt Manager</div>
             <div class="subtitle">Manage your debt like a pro</div>
           </div>
-        </div>
+        </a>
         <button type="button" class="hamburger-btn" aria-label="Toggle menu" aria-expanded="false">
           <span class="hamburger-icon"><span></span><span></span><span></span></span>
           <span class="close-icon" aria-hidden="true">×</span>
@@ -1294,7 +1357,7 @@
         window.addEventListener('load', function () {
           navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(
             function () {},
-            function () {}
+            function (err) { console.warn('Service worker registration failed:', err); }
           );
         });
       }

@@ -19,7 +19,17 @@
 <div class="card">
   <h2 style="margin-top: 0">Recent budgets</h2>
   <p style="margin: 0 0 var(--space-4); color: var(--muted); font-size: 14px;">Click a month to set income and categories.</p>
-  <div class="table-wrapper">
+  <div class="budget-list-cards">
+    {{range .Budgets}}
+    <a href="/budget/view?year={{.Year}}&month={{.Month}}" class="budget-list-card">
+      <div class="budget-list-card-main">
+        <span class="budget-list-card-name">{{monthName .Month}} {{.Year}}</span>
+        <span class="budget-list-card-income">{{money .IncomeCents}}</span>
+      </div>
+    </a>
+    {{end}}
+  </div>
+  <div class="table-wrapper budget-list-table">
   <table>
     <thead>
       <tr>

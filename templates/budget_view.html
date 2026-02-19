@@ -42,7 +42,48 @@
 
 {{if .Categories}}
 <div class="card" style="margin-top: var(--space-3);">
-  <div class="table-wrapper">
+  <div class="budget-categories-list">
+    {{range .Categories}}
+    <div class="budget-category-card">
+      <div class="budget-category-card-main">
+        <span class="budget-category-card-name">{{.Name}}</span>
+        <span class="budget-category-card-remaining">
+          {{$rem := sub .LimitCents .SpentCents}}
+          {{if lt $rem 0}}<span class="badge bad">{{money $rem}}</span>{{else}}<span style="color: var(--good);">{{money $rem}}</span>{{end}}
+        </span>
+      </div>
+      <div class="budget-category-card-meta">
+        <span>Limit {{money .LimitCents}}</span>
+        <span>Spent {{money .SpentCents}}</span>
+      </div>
+      {{$pct := pct .SpentCents .LimitCents}}
+      <div class="budget-progress">
+        <div class="budget-progress-fill {{if gt $pct 100}}over{{end}}" style="width: {{if gt $pct 100}}100{{else}}{{$pct}}{{end}}%;"></div>
+      </div>
+      <div class="budget-category-card-debt">
+        {{if .IsDebtPayoff}}
+        <span class="badge good">Extra for debt</span>
+        {{if gt .SuggestedPayoffCents 0}}
+        <span class="help">Suggested: {{money .SuggestedPayoffCents}}</span>
+        {{end}}
+        {{else}}
+        <span style="color: var(--muted);">—</span>
+        {{end}}
+      </div>
+      <div class="budget-category-card-actions budget-category-row budget-actions">
+        <a href="/budget/expense/add?category_id={{.ID}}" class="btn">+ Expense</a>
+        <a href="/budget/category/expenses?category_id={{.ID}}" class="btn">List</a>
+        <a href="/budget/category/edit?id={{.ID}}" class="btn">Edit</a>
+        <form method="POST" action="/budget/category/delete" style="margin:0;" onsubmit="return confirm('Delete this category and all its expenses?');">
+          <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}" />
+          <input type="hidden" name="id" value="{{.ID}}" />
+          <button class="btn danger" type="submit">Delete</button>
+        </form>
+      </div>
+    </div>
+    {{end}}
+  </div>
+  <div class="table-wrapper budget-categories-table">
   <table>
     <thead>
       <tr>
