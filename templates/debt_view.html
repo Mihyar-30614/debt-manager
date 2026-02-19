@@ -1,6 +1,6 @@
 {{define "debt_view_content"}}
 <div class="breadcrumb">
-  <a href="/">Dashboard</a> → {{.Debt.Name}}
+  <a href="/">Dashboard</a> <span class="breadcrumb-sep">›</span> <span class="current">{{.Debt.Name}}</span>
 </div>
 <div class="row">
   <div>
@@ -56,23 +56,25 @@
 
     <div class="spacer"></div>
 
-    <div class="budget-actions">
-      <a href="/debts/edit?id={{.Debt.ID}}" class="btn">Edit</a>
-      <form method="POST" action="/debts/toggle" style="margin:0;">
+    <div class="debt-actions">
+      <div class="budget-actions">
+        <a href="/debts/edit?id={{.Debt.ID}}" class="btn">Edit</a>
+        <form method="POST" action="/debts/toggle" style="margin:0;">
+          <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+          <input type="hidden" name="id" value="{{.Debt.ID}}" />
+          {{if .Debt.Active}}
+          <input type="hidden" name="active" value="0" />
+          <button class="btn danger" type="submit">Close</button>
+          {{else}}
+          <input type="hidden" name="active" value="1" />
+          <button class="btn primary" type="submit">Re-open</button>
+          {{end}}
+        </form>
+      </div>
+      <form method="POST" action="/debts/delete" class="debt-delete-form" onsubmit="return confirm('Permanently delete this debt? All payment history for this debt will be removed and cannot be undone.');">
         <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
         <input type="hidden" name="id" value="{{.Debt.ID}}" />
-        {{if .Debt.Active}}
-        <input type="hidden" name="active" value="0" />
-        <button class="btn danger" type="submit">Close</button>
-        {{else}}
-        <input type="hidden" name="active" value="1" />
-        <button class="btn primary" type="submit">Re-open</button>
-        {{end}}
-      </form>
-      <form method="POST" action="/debts/delete" style="margin:0;" onsubmit="return confirm('Are you sure you want to delete this debt? This will also delete all associated payments.');">
-        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
-        <input type="hidden" name="id" value="{{.Debt.ID}}" />
-        <button class="btn danger" type="submit">Delete</button>
+        <button class="btn btn-ghost-danger" type="submit">Delete debt</button>
       </form>
     </div>
   </div>

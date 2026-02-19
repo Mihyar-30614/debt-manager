@@ -138,12 +138,27 @@
         margin-top: 2px;
       }
 
+      .topbar {
+        position: relative;
+      }
       nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 6px;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 180px;
+        padding: var(--space-2);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        z-index: 20;
+      }
+      header.menu-open nav {
         display: flex;
-        gap: var(--space-2);
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: flex-end;
       }
       .navlink {
         padding: var(--space-2) var(--space-3);
@@ -161,7 +176,7 @@
       }
 
       .hamburger-btn {
-        display: none;
+        display: flex;
         align-items: center;
         justify-content: center;
         width: 44px;
@@ -749,9 +764,14 @@
       /* Breadcrumbs & page actions (app-wide) */
       .breadcrumb,
       .budget-breadcrumb {
-        font-size: 13px;
+        font-size: 14px;
         color: var(--muted);
         margin-bottom: var(--space-2);
+      }
+      .breadcrumb-sep {
+        margin: 0 6px;
+        color: var(--line-strong);
+        user-select: none;
       }
       .breadcrumb a,
       .budget-breadcrumb a {
@@ -761,6 +781,90 @@
       .breadcrumb a:hover,
       .budget-breadcrumb a:hover {
         text-decoration: underline;
+      }
+      .breadcrumb .current {
+        font-weight: 600;
+        color: var(--text-strong);
+      }
+      .total-balance-inline {
+        margin-top: var(--space-3);
+        margin-bottom: 0;
+        font-size: 14px;
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-2);
+      }
+      .total-balance-label {
+        color: var(--muted);
+      }
+      .total-balance-value {
+        font-size: 1.35rem;
+        letter-spacing: -0.02em;
+        color: var(--text-strong);
+      }
+      .row-header .header-block {
+        min-width: 0;
+      }
+      .btn-ghost-danger {
+        background: transparent;
+        border-color: transparent;
+        color: var(--bad);
+        font-weight: 500;
+      }
+      .btn-ghost-danger:hover {
+        background: var(--bad-dim);
+        border-color: rgba(248, 113, 113, 0.35);
+        color: #fca5a5;
+      }
+      .debt-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+      }
+      .debt-delete-form {
+        margin: 0;
+      }
+      .debts-list {
+        display: none;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+      .debt-card {
+        display: block;
+        padding: var(--space-4);
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.15s ease, background 0.15s ease;
+      }
+      .debt-card:hover {
+        border-color: var(--line-strong);
+        background: var(--card-hover);
+      }
+      .debt-card-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: var(--space-3);
+      }
+      .debt-card-name {
+        font-weight: 600;
+        color: var(--text-strong);
+      }
+      .debt-card-balance {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text-strong);
+      }
+      .debt-card-meta {
+        margin-top: var(--space-2);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
       }
       .page-actions {
         display: flex;
@@ -879,7 +983,6 @@
           display: none;
         }
         .hamburger-btn {
-          display: flex;
           order: 2;
         }
         .menu-open .close-icon {
@@ -889,7 +992,7 @@
           display: none;
         }
         nav {
-          display: none;
+          position: static;
           width: 100%;
           order: 3;
           flex-direction: column;
@@ -897,6 +1000,10 @@
           border-top: 1px solid var(--line);
           margin-top: 4px;
           gap: 4px;
+          min-width: 0;
+          border: none;
+          border-radius: 0;
+          box-shadow: none;
         }
         header.menu-open nav {
           display: flex;
@@ -912,6 +1019,12 @@
         }
         .navlink:hover {
           background: rgba(15, 23, 42, 0.7);
+        }
+        .debts-list {
+          display: flex;
+        }
+        .debts-table {
+          display: none;
         }
         main {
           padding: 16px 0 32px;
@@ -960,11 +1073,12 @@
     </style>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        // Hamburger menu (mobile)
+        // Menu (dropdown on desktop, full-width on mobile)
         var header = document.getElementById("header");
         var hamburgerBtn = header && header.querySelector(".hamburger-btn");
         if (hamburgerBtn) {
-          hamburgerBtn.addEventListener("click", function () {
+          hamburgerBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
             var open = header.classList.toggle("menu-open");
             hamburgerBtn.setAttribute("aria-expanded", open);
           });
@@ -974,6 +1088,29 @@
               hamburgerBtn.setAttribute("aria-expanded", "false");
             });
           });
+          document.addEventListener("click", function (e) {
+            if (header.classList.contains("menu-open") && !header.contains(e.target)) {
+              header.classList.remove("menu-open");
+              hamburgerBtn.setAttribute("aria-expanded", "false");
+            }
+          });
+        }
+
+        // Auto-apply filters on dashboard (submit on select change, debounced search)
+        var filterForm = document.getElementById("filter-form");
+        if (filterForm) {
+          var searchInput = filterForm.querySelector("#search-input");
+          var kindSelect = filterForm.querySelector("select[name=kind]");
+          var statusSelect = filterForm.querySelector("select[name=status]");
+          if (kindSelect) kindSelect.addEventListener("change", function () { filterForm.submit(); });
+          if (statusSelect) statusSelect.addEventListener("change", function () { filterForm.submit(); });
+          if (searchInput) {
+            var debounceTimer;
+            searchInput.addEventListener("input", function () {
+              clearTimeout(debounceTimer);
+              debounceTimer = setTimeout(function () { filterForm.submit(); }, 400);
+            });
+          }
         }
 
         // Focus first input on debt forms when page loads

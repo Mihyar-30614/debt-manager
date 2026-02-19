@@ -1,12 +1,16 @@
 {{define "index_content"}}
-<div class="breadcrumb">Dashboard</div>
-<div class="row">
-  <div>
+<div class="breadcrumb"><span class="current">Dashboard</span></div>
+<div class="row row-header">
+  <div class="header-block">
     <h1>Dashboard</h1>
     <p>Balances, payments, and payoff planning in one place.</p>
     {{if gt .PaymentsThisMonthCount 0}}
     <p class="summary-line">You've made <strong>{{.PaymentsThisMonthCount}}</strong> {{if eq .PaymentsThisMonthCount 1}}payment{{else}}payments{{end}} this month ({{money .PaymentsThisMonthTotal}} total).</p>
     {{end}}
+    <p class="total-balance-inline">
+      <span class="total-balance-label">Total balance</span>
+      <strong class="total-balance-value">{{money .Total}}</strong>
+    </p>
   </div>
   <div class="page-actions">
     {{if .ActiveDebts}}
@@ -20,7 +24,7 @@
 
 <div class="card">
   <h2 style="margin-top: 0">Filter debts</h2>
-  <form method="GET" action="/" class="search-form">
+  <form method="GET" action="/" class="search-form" id="filter-form">
     <div class="search-field">
       <label>Search</label>
       <input
@@ -58,9 +62,8 @@
       <div style="display: flex; flex-direction: column;">
         <label style="visibility: hidden; height: 0; margin: 0;">Actions</label>
         <div style="display: flex; gap: 8px;">
-          <button type="submit" class="btn primary">Filter</button>
           {{if or .SearchQuery .KindFilter .StatusFilter}}
-          <a href="/" class="btn ghost">Clear</a>
+          <a href="/" class="btn ghost">Clear filters</a>
           {{end}}
         </div>
       </div>
@@ -70,27 +73,33 @@
 
 <div class="spacer"></div>
 
-<div class="grid cols-2">
-  <div class="card stat">
-    <div class="label">Total balance (all debts)</div>
-    <div class="value">{{money .Total}}</div>
-    <div class="help">Includes closed debts.</div>
-  </div>
-  <div class="card stat">
-    <div class="label">Active balance</div>
-    <div class="value">{{money .ActiveTotal}}</div>
-    <div class="help">Debts you're currently paying down.</div>
-  </div>
-</div>
-
-
 <h2>Debts</h2>
 {{if .Debts}}
 {{$searchQuery := .SearchQuery}}
 {{$kindFilter := .KindFilter}}
 {{$statusFilter := .StatusFilter}}
 {{$sortBy := .SortBy}}
-<div class="table-wrapper">
+
+<div class="debts-list">
+  {{range .Debts}}
+  <a href="/debts/view?id={{.ID}}" class="debt-card">
+    <div class="debt-card-main">
+      <span class="debt-card-name">{{.Name}}</span>
+      <span class="debt-card-balance">{{money .BalanceCents}}</span>
+    </div>
+    <div class="debt-card-meta">
+      <span class="badge">{{debtKind .Kind}}</span>
+      {{if .Active}}
+      <span class="badge good">Active</span>
+      {{else}}
+      <span class="badge">Closed</span>
+      {{end}}
+    </div>
+  </a>
+  {{end}}
+</div>
+
+<div class="table-wrapper debts-table">
 <table>
   <thead>
     <tr>

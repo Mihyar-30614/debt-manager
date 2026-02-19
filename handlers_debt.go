@@ -34,15 +34,11 @@ func (a *App) handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var total int64
-	var activeTotal int64
 	activeDebts := make([]Debt, 0)
 	for _, d := range debts {
 		total += d.BalanceCents
-		if d.Active {
-			activeTotal += d.BalanceCents
-			if d.BalanceCents > 0 {
-				activeDebts = append(activeDebts, d)
-			}
+		if d.Active && d.BalanceCents > 0 {
+			activeDebts = append(activeDebts, d)
 		}
 	}
 	paymentsThisMonthCount, paymentsThisMonthTotal, _ := PaymentsThisMonth(a.db, userID)
@@ -52,7 +48,6 @@ func (a *App) handleIndex(w http.ResponseWriter, r *http.Request) {
 		"Debts":                 debts,
 		"ActiveDebts":           activeDebts,
 		"Total":                 total,
-		"ActiveTotal":           activeTotal,
 		"PaymentsThisMonthCount": paymentsThisMonthCount,
 		"PaymentsThisMonthTotal": paymentsThisMonthTotal,
 		"SearchQuery":           searchQuery,
